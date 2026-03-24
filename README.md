@@ -12,7 +12,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Channels_MCP-7C3AED.svg)](https://code.claude.com/docs/en/channels)
 
-[Getting Started](#getting-started) · [How It Works](#how-it-works) · [Presets](#presets) · [Why Not Just One Agent?](#why-not-just-one-agent)
+[Getting Started](#getting-started) · [How It Works](#how-it-works) · [Presets](#presets) · [Why Not Just One Agent?](#why-not-just-one-agent) · [Live Demo](https://vibe-rator.github.io/Council-of-Elrond/demo/)
 
 </div>
 
