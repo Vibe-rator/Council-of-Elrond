@@ -123,7 +123,18 @@ elrond ./configs/example.json
 | `Ctrl+F` | Force an agent to speak |
 | `Ctrl+T` | Cycle theme (Cyberpunk → Matrix → Amber → Mono) |
 | `Ctrl+Y` | Copy recent messages to clipboard |
+| `Ctrl+J/K` | Select next/previous agent |
 | `Ctrl+Q` | End the meeting |
+
+### Chat Commands
+
+Type these in the input bar as Frodo:
+
+| Command | Action |
+|---------|--------|
+| `/stop` or `/pause` | Pause the meeting — agents stop speaking |
+| `/resume` | Resume a paused meeting |
+| `/save` | Save full transcript to `~/.elrond/` |
 
 ## Meeting Output
 
