@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Open-source project scaffolding (LICENSE, CI, templates, Biome)
 - Multi-agent meeting system with Hub, Channel MCP Server, Launcher, and Viewer
 - WebSocket + REST message broker with ULID ordering and gap recovery
 - Terminal TUI with real-time chat log, agent status, and theme switching
