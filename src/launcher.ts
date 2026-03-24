@@ -118,12 +118,12 @@ function buildAgentConfigs(opts: LaunchOptions): AgentConfig[] {
 // ---------------------------------------------------------------------------
 
 function setupAgentWorkdir(
-  meetingId: string,
+  outputDir: string,
   config: AgentConfig,
   hubPort: number,
   projectRoot: string,
 ): string {
-  const dir = join(process.cwd(), "elrond-output", meetingId, config.id);
+  const dir = join(outputDir, config.id);
   mkdirSync(dir, { recursive: true });
 
   // .mcp.json — Claude Code discovers the Channel MCP Server from this
@@ -211,9 +211,11 @@ export async function launch(opts: LaunchOptions): Promise<void> {
   process.stderr.write(`[elrond] Agents: ${agentConfigs.map((a) => a.name).join(", ")}\n`);
 
   // --- Step 1: Start Hub (detached — survives Viewer crash) ---
+  const outputDir = join(process.cwd(), "elrond-output", meetingId);
   const hubEnv: Record<string, string> = {
     ...(process.env as Record<string, string>),
     ELROND_MEETING_ID: meetingId,
+    ELROND_OUTPUT_DIR: outputDir,
   };
   if (opts.restoreFile) {
     hubEnv.ELROND_RESTORE_FILE = opts.restoreFile;
@@ -240,7 +242,7 @@ export async function launch(opts: LaunchOptions): Promise<void> {
 
   for (let i = 0; i < agentConfigs.length; i++) {
     const config = agentConfigs[i]!;
-    const workdir = setupAgentWorkdir(meetingId, config, hubPort, projectRoot);
+    const workdir = setupAgentWorkdir(outputDir, config, hubPort, projectRoot);
 
     // Create pane (first agent uses the existing pane)
     const pane = `${tmuxSession}:0.${i}`;

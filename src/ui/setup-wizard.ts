@@ -86,22 +86,36 @@ interface SavedMeetingEntry {
 }
 
 function listSavedMeetings(): SavedMeetingEntry[] {
-  const dir = join(homedir(), ".elrond", "meetings");
-  if (!existsSync(dir)) return [];
+  const dirs = [
+    join(process.cwd(), "elrond-output"),
+    join(homedir(), ".elrond", "meetings"), // legacy fallback
+  ];
   const entries: SavedMeetingEntry[] = [];
-  for (const f of readdirSync(dir)) {
-    if (!f.endsWith(".json")) continue;
-    try {
-      const raw = readFileSync(join(dir, f), "utf8");
-      const state = JSON.parse(raw) as MeetingState;
-      entries.push({
-        file: join(dir, f),
-        topic: state.topic,
-        savedAt: state.savedAt,
-        agentCount: state.agents.length,
-        messageCount: state.messages.length,
-      });
-    } catch {}
+  const seen = new Set<string>();
+
+  for (const baseDir of dirs) {
+    if (!existsSync(baseDir)) continue;
+    for (const sub of readdirSync(baseDir)) {
+      // elrond-output/{meetingId}/{meetingId}.json
+      const nested = join(baseDir, sub, `${sub}.json`);
+      // ~/.elrond/meetings/{meetingId}.json
+      const flat = join(baseDir, sub);
+      for (const candidate of [nested, flat]) {
+        if (!candidate.endsWith(".json") || !existsSync(candidate) || seen.has(candidate)) continue;
+        seen.add(candidate);
+        try {
+          const raw = readFileSync(candidate, "utf8");
+          const state = JSON.parse(raw) as MeetingState;
+          entries.push({
+            file: candidate,
+            topic: state.topic,
+            savedAt: state.savedAt,
+            agentCount: state.agents.length,
+            messageCount: state.messages.length,
+          });
+        } catch {}
+      }
+    }
   }
   return entries.sort((a, b) => b.savedAt - a.savedAt);
 }

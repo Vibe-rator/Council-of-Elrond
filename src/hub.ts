@@ -150,7 +150,7 @@ function resumeMeeting(): void {
 
 // --- Save / Restore ---
 
-const SAVE_DIR = join(homedir(), ".elrond", "meetings");
+const SAVE_DIR = process.env.ELROND_OUTPUT_DIR || join(homedir(), ".elrond", "meetings");
 
 function saveMeetingState(topic?: string): string {
   mkdirSync(SAVE_DIR, { recursive: true });

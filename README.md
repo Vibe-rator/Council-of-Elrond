@@ -143,17 +143,15 @@ When a meeting concludes, results are saved automatically:
 ```
 ./elrond-output/                  ← created in your current working directory
   └── elrond-mn4hnfnx/           ← meeting ID
+      ├── elrond-mn4hnfnx.json   ← full transcript (all messages, metadata, ledger)
       ├── agent-1/
       │   └── *.md               ← any files agents produced (resolutions, plans, etc.)
       ├── agent-2/
       └── ...
-
-~/.elrond/meetings/
-  └── elrond-mn4hnfnx.json       ← full transcript (all messages, metadata, ledger)
 ```
 
-- **Agent artifacts** — agents can write files during the meeting (e.g., a resolution document, architecture plan, or action items). These are saved per-agent under `./elrond-output/`.
 - **Full transcript** — every message, speaker, timestamp, and consensus state in JSON. Feed it into another tool, render it as a [web page](https://vibe-rator.github.io/Council-of-Elrond/demo/), or just read it.
+- **Agent artifacts** — agents can write files during the meeting (e.g., a resolution document, architecture plan, or action items). These are saved per-agent.
 - **Pause & resume** — press `Ctrl+Q` to end. The transcript is saved on exit. *(Session resume is on the roadmap.)*
 
 ## Presets
