@@ -1,0 +1,31 @@
+{
+  "name": "project-elrond",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/launcher.ts",
+    "hub": "bun run src/hub.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test"
+  },
+  "bin": {
+    "elrond": "src/launcher.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "@mariozechner/pi-tui": "^0.62.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "ink": "^6.6.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^19.2.0",
+    "ulid": "^3.0.2"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "topic": "Design the authentication system for our new API",
+  "agents": [
+    {
+      "name": "Architect",
+      "model": "claude-opus-4-6",
+      "effort": "max",
+      "persona": "Senior software architect. Focus on system design, scalability, and separation of concerns."
+    },
+    {
+      "name": "Security",
+      "model": "claude-opus-4-6",
+      "effort": "max",
+      "persona": "Security engineer. Scrutinize every design for vulnerabilities, auth bypasses, and data leaks."
+    },
+    {
+      "name": "Frontend",
+      "model": "claude-sonnet-4-6",
+      "effort": "max",
+      "persona": "Frontend developer. Focus on UX, API ergonomics, and client-side implementation concerns."
+    }
+  ]
+}
