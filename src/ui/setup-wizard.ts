@@ -6,7 +6,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { Input, Key, matchesKey, ProcessTerminal, TUI } from "@mariozechner/pi-tui";
+import { Input, Key, matchesKey, ProcessTerminal, TUI, truncateToWidth } from "@mariozechner/pi-tui";
 import chalk from "chalk";
 import { CATEGORIES, type Preset, presetsByCategory } from "../presets.ts";
 import type { MeetingState } from "../types.ts";
@@ -587,21 +587,21 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderTopic(_w: number): string[] {
+    function renderTopic(w: number): string[] {
       const lines: string[] = [];
       if (selectedPreset) {
         lines.push(
-          `  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`,
+          truncateToWidth(`  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`, w, ""),
         );
         lines.push("");
       }
       lines.push(`  ${h(C.fg)("? Meeting topic:")}`);
       lines.push("");
       if (textInputActive) {
-        lines.push(`  ${bold(C.accent, ">")} ${textInput.getValue?.() ?? ""}█`);
+        lines.push(truncateToWidth(`  ${bold(C.accent, ">")} ${textInput.getValue?.() ?? ""}█`, w, ""));
       } else {
         lines.push(
-          `  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`,
+          truncateToWidth(`  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`, w, ""),
         );
       }
       lines.push("");
@@ -706,9 +706,9 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderConfirm(_w: number): string[] {
+    function renderConfirm(w: number): string[] {
       const lines: string[] = [];
-      lines.push(`  ${h(C.fgSec)("Topic:")} ${bold(C.fg, topic)}`);
+      lines.push(truncateToWidth(`  ${h(C.fgSec)("Topic:")} ${bold(C.fg, topic)}`, w, ""));
       lines.push("");
       lines.push(`  ${h(C.fgSec)("─═")} ${bold(C.fgSec, "Agents")} ${h(C.fgSec)("═─")}`);
       lines.push("");
@@ -720,11 +720,11 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         const nameColor = selected ? C.fg : C.fgSec;
 
         lines.push(
-          `${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`,
+          truncateToWidth(`${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`, w, ""),
         );
 
         const persona = a.persona.length > 60 ? `${a.persona.slice(0, 60)}...` : a.persona;
-        lines.push(`      ${h(C.fgMuted)(persona || "(no persona)")}`);
+        lines.push(truncateToWidth(`      ${h(C.fgMuted)(persona || "(no persona)")}`, w, ""));
         lines.push("");
       }
 

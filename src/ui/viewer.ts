@@ -42,6 +42,7 @@ let themeName: ElrondTheme["name"] = "cyberpunk";
 const messages: MeetingMessage[] = [];
 let participants: ParticipantInfo[] = [];
 let hubState = "connecting";
+let meetingEnded = false;
 let _meetingId = "";
 let lastSeenUlid: string | null = null;
 let selectedAgentIdx = 0;
@@ -370,6 +371,10 @@ class MainArea {
 /** HelpBar: 1-line keyboard hints */
 class HelpBar {
   render(width: number): string[] {
+    if (meetingEnded) {
+      const msg = `${hex(theme.colors.accent).bold("Meeting concluded.")}  ${hex(theme.colors.fgMuted)("Press")} ${hex(theme.colors.accent).bold("^Q")} ${hex(theme.colors.fgMuted)("to exit and clean up tmux session.")}`;
+      return [truncateToWidth(` ${msg}`, width, "")];
+    }
     const items = [
       [hex(theme.colors.accent).bold("Enter"), "Send"],
       [hex(theme.colors.accent).bold("↑/↓/PgUp/Dn"), "Scroll"],
@@ -450,6 +455,9 @@ function connectToHub(): void {
         if (messages.some((m) => m.id === evt.id)) break;
         lastSeenUlid = evt.id;
         messages.push(evt);
+        if (evt.eventKind === "conclusion_complete") {
+          meetingEnded = true;
+        }
         if (
           [
             "agent_joined",

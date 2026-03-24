@@ -9,7 +9,7 @@
  *   elrond ./configs/team.json        # From config file
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { AgentConfig } from "./types.ts";
 
@@ -123,7 +123,7 @@ function setupAgentWorkdir(
   hubPort: number,
   projectRoot: string,
 ): string {
-  const dir = join("/tmp/elrond", meetingId, config.id);
+  const dir = join(process.cwd(), "elrond-output", meetingId, config.id);
   mkdirSync(dir, { recursive: true });
 
   // .mcp.json — Claude Code discovers the Channel MCP Server from this
@@ -326,9 +326,6 @@ export async function launch(opts: LaunchOptions): Promise<void> {
     process.stderr.write(`\n[elrond] Shutting down meeting...\n`);
     tmux("kill-session", "-t", tmuxSession);
     if (!hubProc.killed) hubProc.kill();
-    try {
-      rmSync(`/tmp/elrond/${meetingId}`, { recursive: true, force: true });
-    } catch {}
     try {
       unlinkSync(portFile);
     } catch {}
