@@ -144,19 +144,30 @@ The fellowship deliberates. Each persona maps to a useful meeting role — strat
 - **Writers Room** — Writer, Editor, Reader
 - **Game Design** — Designer, Balancer, QA, Player
 
-## vs Agent Teams
+## How Is This Different?
 
-Claude Code already has [Agent Teams](https://code.claude.com/docs/en/agent-teams). How is this different?
+There are several multi-agent tools out there. Here's where Council of Elrond fits:
 
-|  | Agent Teams | Council of Elrond |
-|--|------------|-------------------|
-| Structure | Hierarchical (lead → teammates) | Flat (round table) |
-| Communication | Through the lead only | Everyone hears everyone |
-| Purpose | "Build this" — task delegation | "Discuss this" — deliberation |
-| Agent-to-agent | ❌ | ✅ |
-| User role | Project manager | Frodo (decision-maker) |
+|  | Agent Teams | AutoGen | Cross-Claude MCP | ChatDev | **Council of Elrond** |
+|--|------------|---------|-----------------|---------|----------------------|
+| Structure | Lead → teammates | Configurable | Flat (P2P) | Phase-based roles | **Flat (round table)** |
+| Communication | Through lead only | Shared thread | Polling (SQLite) | Sequential 2-agent | **Real-time push** |
+| Agent-to-agent talk | ❌ | ✅ | ✅ | ✅ (paired) | **✅ (all-to-all)** |
+| Purpose | Task delegation | General framework | Message passing | Software generation | **Deliberation** |
+| Setup | Code spawning | Python code | Config + install | Python code | **`elrond` one command** |
+| Real-time TUI | ❌ | ❌ | ❌ | ❌ | **✅** |
+| User intervention | Spawn & wait | Programmatic | Manual | None | **Anytime (Frodo)** |
+| Push notifications | Internal API | Sequential calls | ❌ (polling) | Sequential calls | **Channels MCP** |
 
-They're complementary:
+**[Agent Teams](https://code.claude.com/docs/en/agent-teams)** is the closest comparison — it's built into Claude Code. But it's hierarchical: a lead delegates tasks to teammates who report back. Teammates don't talk to each other. It's a project manager, not a meeting.
+
+**[AutoGen](https://github.com/microsoft/autogen)** has group chat, but it's a Python framework — you write code to set up agents. Council of Elrond is a ready-to-use CLI tool.
+
+**[Cross-Claude MCP](https://github.com/rblank9/cross-claude-mcp)** lets Claude instances message each other, but uses polling (SQLite), not real-time push.
+
+**[ChatDev](https://github.com/OpenBMB/ChatDev)** simulates a software company with role-based agents, but conversations are sequential pairs (CEO↔CTO, then Programmer↔Tester), not free-form group discussion.
+
+They're complementary — Council of Elrond fills the gap:
 1. **Council of Elrond** → discuss *what* to build and *how*
 2. **Agent Teams** → build it
 
