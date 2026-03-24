@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/hero.jpg" alt="Council of Elrond" width="700">
+
 # ⚔️ Council of Elrond
 
 **One does not simply solve a problem alone.**
