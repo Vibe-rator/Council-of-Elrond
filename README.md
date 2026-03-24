@@ -220,11 +220,6 @@ Options:
 
 Built with [Bun](https://bun.sh), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and [pi-tui](https://www.npmjs.com/package/@mariozechner/pi-tui).
 
-## Known Issues
-
-- **macOS Terminal.app + Korean/CJK IME**: Mouse scroll is disabled on Terminal.app to prevent a crash caused by AppKit's `NSTextInputContext` conflicting with mouse capture mode. Use iTerm2 or Ghostty for full mouse support.
-- **Persona hot-reload**: MCP `instructions` are set once at connection time. Runtime persona changes are delivered via channel notification (soft override), not a hard system prompt swap.
-
 ## License
 
 MIT
