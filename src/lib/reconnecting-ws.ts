@@ -5,11 +5,7 @@
  * (call `resetBackoff()` from the application layer after ACK + SYNC_COMPLETE).
  */
 
-export type ConnectionState =
-  | "connecting"
-  | "connected"
-  | "reconnecting"
-  | "disconnected";
+export type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
 
 export interface ReconnectConfig {
   initialDelayMs: number;
@@ -111,8 +107,7 @@ export class ReconnectingWebSocket {
 
   private scheduleReconnect(): void {
     const base = Math.min(
-      this.config.initialDelayMs *
-        Math.pow(this.config.backoffFactor, this.attempt),
+      this.config.initialDelayMs * this.config.backoffFactor ** this.attempt,
       this.config.maxDelayMs,
     );
     const jitter = base * this.config.jitterFactor;

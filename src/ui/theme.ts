@@ -27,7 +27,18 @@ export interface ElrondTheme {
   systemColor: string;
 }
 
-const AGENT_SLOTS = ["#00ffff", "#ff00ff", "#00ff88", "#ffaa00", "#5588ff", "#ff5577", "#88ffcc", "#ddaa55", "#aa88ff", "#55ddff"];
+const AGENT_SLOTS = [
+  "#00ffff",
+  "#ff00ff",
+  "#00ff88",
+  "#ffaa00",
+  "#5588ff",
+  "#ff5577",
+  "#88ffcc",
+  "#ddaa55",
+  "#aa88ff",
+  "#55ddff",
+];
 
 export const THEMES: Record<ElrondTheme["name"], ElrondTheme> = {
   cyberpunk: {

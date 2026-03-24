@@ -10,28 +10,26 @@
  */
 
 import {
-  TUI,
-  ProcessTerminal,
-  Text as PiText,
   Input,
-  Container,
-  matchesKey,
   Key,
+  matchesKey,
+  ProcessTerminal,
+  TUI,
+  truncateToWidth,
   visibleWidth,
   wrapTextWithAnsi,
-  truncateToWidth,
 } from "@mariozechner/pi-tui";
 import chalk from "chalk";
 import { ReconnectingWebSocket } from "../lib/reconnecting-ws.ts";
-import { THEMES, agentColor, type ElrondTheme } from "./theme.ts";
 import type {
-  MeetingMessage,
-  ParticipantInfo,
-  WsEnvelope,
   HandshakeAckPayload,
   HandshakePayload,
+  MeetingMessage,
+  ParticipantInfo,
   SystemEvent,
+  WsEnvelope,
 } from "../types.ts";
+import { agentColor, type ElrondTheme, THEMES } from "./theme.ts";
 
 // ---------------------------------------------------------------------------
 // State
@@ -44,7 +42,7 @@ let themeName: ElrondTheme["name"] = "cyberpunk";
 const messages: MeetingMessage[] = [];
 let participants: ParticipantInfo[] = [];
 let hubState = "connecting";
-let meetingId = "";
+let _meetingId = "";
 let lastSeenUlid: string | null = null;
 let selectedAgentIdx = 0;
 let chatScrollOffset = 0; // lines from bottom
@@ -122,7 +120,11 @@ function buildChatLines(chatWidth: number): ChatLine[] {
     // Content lines — wrapped for CJK
     const indent = isFrodo ? "   " : "  ";
     const wrapWidth = Math.max(chatWidth - visibleWidth(indent) - 1, 20);
-    const contentColor = isFrodo ? theme.frodoColor : isSystem ? theme.colors.fgMuted : theme.colors.fg;
+    const contentColor = isFrodo
+      ? theme.frodoColor
+      : isSystem
+        ? theme.colors.fgMuted
+        : theme.colors.fg;
     const contentBold = isFrodo;
 
     for (const paragraph of msg.content.split("\n")) {
@@ -171,26 +173,45 @@ function buildAgentLines(width: number): string[] {
         : "  ";
 
     // Name
-    lines.push(truncateToWidth(
-      `${arrow}${hexBg(color).black(` ${initial(agent.name)} `)} ${hex(color).bold(agent.name)}`,
-      width, "",
-    ));
+    lines.push(
+      truncateToWidth(
+        `${arrow}${hexBg(color).black(` ${initial(agent.name)} `)} ${hex(color).bold(agent.name)}`,
+        width,
+        "",
+      ),
+    );
 
     // Model + effort
     const model = agent.config?.model?.replace("claude-", "").replace("-20250514", "") ?? "?";
-    lines.push(truncateToWidth(
-      `     ${hex(theme.colors.fgMuted)(`${model} · ${agent.config?.effort ?? "?"}`)}`,
-      width, "",
-    ));
+    lines.push(
+      truncateToWidth(
+        `     ${hex(theme.colors.fgMuted)(`${model} · ${agent.config?.effort ?? "?"}`)}`,
+        width,
+        "",
+      ),
+    );
 
     // Status
     const isConcluding = agent.status === "concluding";
-    const si = isSpeaking ? "●" : isConcluding ? "★" : agent.status === "idle" ? "○" : agent.status === "disconnected" ? "✕" : "◐";
-    const sc = isSpeaking ? theme.colors.success : isConcluding ? theme.colors.warning : agent.status === "idle" ? theme.colors.fgMuted : agent.status === "disconnected" ? theme.colors.error : theme.colors.warning;
-    lines.push(truncateToWidth(
-      `     ${hex(sc)(`${si} ${agent.status}`)}`,
-      width, "",
-    ));
+    const si = isSpeaking
+      ? "●"
+      : isConcluding
+        ? "★"
+        : agent.status === "idle"
+          ? "○"
+          : agent.status === "disconnected"
+            ? "✕"
+            : "◐";
+    const sc = isSpeaking
+      ? theme.colors.success
+      : isConcluding
+        ? theme.colors.warning
+        : agent.status === "idle"
+          ? theme.colors.fgMuted
+          : agent.status === "disconnected"
+            ? theme.colors.error
+            : theme.colors.warning;
+    lines.push(truncateToWidth(`     ${hex(sc)(`${si} ${agent.status}`)}`, width, ""));
     lines.push(""); // spacing
   });
 
@@ -213,7 +234,12 @@ class StatusBar {
 
     const agents = participants.filter((p) => p.clientType === "agent");
     const hubSym = hubState === "connected" ? "●" : hubState === "disconnected" ? "✕" : "◐";
-    const hubClr = hubState === "connected" ? theme.colors.success : hubState === "disconnected" ? theme.colors.error : theme.colors.warning;
+    const hubClr =
+      hubState === "connected"
+        ? theme.colors.success
+        : hubState === "disconnected"
+          ? theme.colors.error
+          : theme.colors.warning;
 
     const left = [
       hex(theme.colors.accentSecondary)("◢◤"),
@@ -230,16 +256,21 @@ class StatusBar {
     ].join(" ");
 
     const right = [
-      hex(theme.colors.accent).bold("^F"), hex(theme.colors.fgMuted)("Force"),
-      hex(theme.colors.accent).bold("^T"), hex(theme.colors.fgMuted)("Theme"),
-      hex(theme.colors.accent).bold("^Q"), hex(theme.colors.fgMuted)("Quit"),
+      hex(theme.colors.accent).bold("^F"),
+      hex(theme.colors.fgMuted)("Force"),
+      hex(theme.colors.accent).bold("^T"),
+      hex(theme.colors.fgMuted)("Theme"),
+      hex(theme.colors.accent).bold("^Q"),
+      hex(theme.colors.fgMuted)("Quit"),
     ].join(" ");
 
     const line = padRight(left, width - visibleWidth(right) - 1) + right;
     return [truncateToWidth(line, width, "")];
   }
 
-  invalidate() { this.cache = undefined; }
+  invalidate() {
+    this.cache = undefined;
+  }
 }
 
 /** MainArea: horizontal split — ChatLog (scrollable) | AgentList */
@@ -251,7 +282,9 @@ class MainArea {
     this.tui = tui;
   }
 
-  setTermHeight(h: number) { this.termHeight = h; }
+  setTermHeight(h: number) {
+    this.termHeight = h;
+  }
 
   render(width: number): string[] {
     const agentWidth = 26;
@@ -265,18 +298,23 @@ class MainArea {
     totalChatLines = allChatLines.length;
 
     // Typing indicators
-    const speakingAgents = participants.filter((p) => p.clientType === "agent" && p.status === "speaking");
+    const speakingAgents = participants.filter(
+      (p) => p.clientType === "agent" && p.status === "speaking",
+    );
     const typingLines: string[] = [];
     for (const agent of speakingAgents.slice(0, 2)) {
       const idx = getAgentIndex(agent.id);
       const color = agentColor(theme, idx);
-      typingLines.push(`  ${hexBg(color).black(` ${initial(agent.name)} `)} ${hex(theme.colors.fgMuted)(`${agent.name} is thinking...`)}`);
+      typingLines.push(
+        `  ${hexBg(color).black(` ${initial(agent.name)} `)} ${hex(theme.colors.fgMuted)(`${agent.name} is thinking...`)}`,
+      );
     }
 
     // Scroll indicator
-    const scrollInfo = chatScrollOffset > 0
-      ? hex(theme.colors.warning).bold(`  ▲ ${chatScrollOffset} lines below — ↓ to scroll`)
-      : hex(theme.colors.fgMuted)("  ▼ latest");
+    const scrollInfo =
+      chatScrollOffset > 0
+        ? hex(theme.colors.warning).bold(`  ▲ ${chatScrollOffset} lines below — ↓ to scroll`)
+        : hex(theme.colors.fgMuted)("  ▼ latest");
 
     // Reserve lines for typing + scroll indicator
     const reservedBottom = typingLines.length + 1;
@@ -300,7 +338,11 @@ class MainArea {
     const agentLines = buildAgentLines(agentWidth - 2); // -2 for padding
     const agentColumn: string[] = [];
     // Agent panel title
-    agentColumn.push(hex(theme.colors.fgMuted)(" ─ ") + hex(theme.colors.fgSecondary).bold("AGENTS") + hex(theme.colors.fgMuted)(" ─"));
+    agentColumn.push(
+      hex(theme.colors.fgMuted)(" ─ ") +
+        hex(theme.colors.fgSecondary).bold("AGENTS") +
+        hex(theme.colors.fgMuted)(" ─"),
+    );
     for (const al of agentLines) {
       agentColumn.push(` ${al}`);
     }
@@ -370,12 +412,16 @@ function connectToHub(): void {
 
   rws.onMessage = (data) => {
     let env: WsEnvelope;
-    try { env = JSON.parse(data); } catch { return; }
+    try {
+      env = JSON.parse(data);
+    } catch {
+      return;
+    }
 
     switch (env.type) {
       case "handshake_ack": {
         const ack = env.payload as HandshakeAckPayload;
-        meetingId = ack.meetingId;
+        _meetingId = ack.meetingId;
         participants = ack.participants;
         if (messages.length === 0 && ack.recentMessages.length > 0) {
           for (const msg of ack.recentMessages) messages.push(msg);
@@ -404,7 +450,18 @@ function connectToHub(): void {
         if (messages.some((m) => m.id === evt.id)) break;
         lastSeenUlid = evt.id;
         messages.push(evt);
-        if (["agent_joined", "agent_left", "agent_crashed", "turn_start", "turn_timeout", "consensus_reached", "conclusion_start", "conclusion_complete"].includes(evt.eventKind)) {
+        if (
+          [
+            "agent_joined",
+            "agent_left",
+            "agent_crashed",
+            "turn_start",
+            "turn_timeout",
+            "consensus_reached",
+            "conclusion_start",
+            "conclusion_complete",
+          ].includes(evt.eventKind)
+        ) {
           fetch(`http://127.0.0.1:${hubPort}/api/participants`)
             .then((r) => r.json())
             .then((d) => {
@@ -453,10 +510,12 @@ function sendMessage(content: string): void {
 
 function copyRecentToClipboard(count: number): void {
   const recent = messages.slice(-count);
-  const text = recent.map((m) => {
-    const time = formatTime(m.timestamp);
-    return `[${time}] ${m.sender.name}: ${m.content}`;
-  }).join("\n\n");
+  const text = recent
+    .map((m) => {
+      const time = formatTime(m.timestamp);
+      return `[${time}] ${m.sender.name}: ${m.content}`;
+    })
+    .join("\n\n");
 
   // macOS pbcopy
   try {
@@ -625,10 +684,12 @@ export function startViewer(port: number): Promise<void> {
     const mouseMatch = data.match(/^\x1b\[<(\d+);\d+;\d+[Mm]$/);
     if (mouseMatch) {
       const btn = Number(mouseMatch[1]);
-      if (btn === 64) { // wheel up
+      if (btn === 64) {
+        // wheel up
         chatScrollOffset = Math.min(chatScrollOffset + 3, Math.max(totalChatLines, 0));
         tui.requestRender();
-      } else if (btn === 65) { // wheel down
+      } else if (btn === 65) {
+        // wheel down
         chatScrollOffset = Math.max(chatScrollOffset - 3, 0);
         tui.requestRender();
       }

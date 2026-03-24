@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Elrond Channel MCP Server — one instance per Claude Code agent session.
  *
@@ -10,23 +11,20 @@
  *   ~/.claude/plugins/.../telegram/server.ts
  */
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 import type {
+  AgentConfig,
+  ForceSpeakPayload,
+  HandshakePayload,
   LedgerEvaluation,
   MeetingMessage,
-  WsEnvelope,
-  ForceSpeakPayload,
   SystemEvent,
-  HandshakePayload,
-  AgentConfig,
+  WsEnvelope,
 } from "./types.ts";
 
 // ---------------------------------------------------------------------------
@@ -146,12 +144,12 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
           },
           ledger: {
             type: "object",
-            description:
-              "Your evaluation of discussion progress.",
+            description: "Your evaluation of discussion progress.",
             properties: {
               consensusReached: {
                 type: "boolean",
-                description: "Has the group reached agreement? True only if all key concerns are addressed.",
+                description:
+                  "Has the group reached agreement? True only if all key concerns are addressed.",
               },
               isInLoop: {
                 type: "boolean",
@@ -163,7 +161,8 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
               },
               conclusionAgent: {
                 type: "string",
-                description: "If consensusReached is true: name of who should produce the final output.",
+                description:
+                  "If consensusReached is true: name of who should produce the final output.",
               },
             },
             required: ["consensusReached", "isInLoop", "progressBeingMade"],
@@ -191,8 +190,7 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "get_participants",
-      description:
-        "List all current participants in the meeting with their status.",
+      description: "List all current participants in the meeting with their status.",
       inputSchema: {
         type: "object" as const,
         properties: {},
@@ -262,9 +260,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
         })) as { message: MeetingMessage };
         outbound.markAcked(outId);
         return {
-          content: [
-            { type: "text" as const, text: `Message sent (id: ${result.message.id})` },
-          ],
+          content: [{ type: "text" as const, text: `Message sent (id: ${result.message.id})` }],
         };
       }
 
@@ -279,9 +275,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
           .map((m: MeetingMessage) => `[${m.sender.name}] (${m.id}): ${m.content}`)
           .join("\n");
         return {
-          content: [
-            { type: "text" as const, text: formatted || "No messages yet." },
-          ],
+          content: [{ type: "text" as const, text: formatted || "No messages yet." }],
         };
       }
 
@@ -349,8 +343,8 @@ await mcp.connect(new StdioServerTransport());
 // Hub WebSocket connection — receive broadcasts, push as channel notifications
 // ---------------------------------------------------------------------------
 
-import { ReconnectingWebSocket } from "./lib/reconnecting-ws.ts";
 import { MessageTracker } from "./lib/message-tracker.ts";
+import { ReconnectingWebSocket } from "./lib/reconnecting-ws.ts";
 
 const tracker = new MessageTracker();
 
@@ -495,7 +489,9 @@ hubWs.onMessage = (data) => {
         participants: unknown[];
         recentMessages: MeetingMessage[];
       };
-      process.stderr.write(`[elrond-channel] ${AGENT_NAME} handshake acknowledged (${ack.recentMessages?.length ?? 0} recent msgs)\n`);
+      process.stderr.write(
+        `[elrond-channel] ${AGENT_NAME} handshake acknowledged (${ack.recentMessages?.length ?? 0} recent msgs)\n`,
+      );
       // Forward recent messages as channel notifications so the agent
       // has full context even for messages sent before its WS connected.
       if (ack.recentMessages) {

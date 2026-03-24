@@ -9,8 +9,8 @@
  *   elrond ./configs/team.json        # From config file
  */
 
-import { existsSync, mkdirSync, writeFileSync, rmSync, unlinkSync, readFileSync } from "fs";
-import { join, resolve } from "path";
+import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import type { AgentConfig } from "./types.ts";
 
 // ---------------------------------------------------------------------------
@@ -182,7 +182,9 @@ function tmux(...args: string[]): boolean {
   });
   if (result.exitCode !== 0) {
     const stderr = new TextDecoder().decode(result.stderr).trim();
-    process.stderr.write(`[elrond] tmux ${args[0]} failed: ${stderr || `exit ${result.exitCode}`}\n`);
+    process.stderr.write(
+      `[elrond] tmux ${args[0]} failed: ${stderr || `exit ${result.exitCode}`}\n`,
+    );
   }
   return result.exitCode === 0;
 }
@@ -210,7 +212,7 @@ export async function launch(opts: LaunchOptions): Promise<void> {
 
   // --- Step 1: Start Hub (detached — survives Viewer crash) ---
   const hubEnv: Record<string, string> = {
-    ...process.env as Record<string, string>,
+    ...(process.env as Record<string, string>),
     ELROND_MEETING_ID: meetingId,
   };
   if (opts.restoreFile) {
@@ -278,7 +280,9 @@ export async function launch(opts: LaunchOptions): Promise<void> {
   for (const { config, pane } of agentPanes) {
     await waitForAgentConnected(hubPort, config.id, 30_000);
     await waitForPaneReady(pane, 30_000);
-    process.stderr.write(`[elrond] ${config.name} MCP connected & TUI ready, sending initial prompt\n`);
+    process.stderr.write(
+      `[elrond] ${config.name} MCP connected & TUI ready, sending initial prompt\n`,
+    );
     const prompt = buildInitialPrompt(config, opts.topic);
     tmuxSendKeys(pane, prompt);
   }
@@ -322,8 +326,12 @@ export async function launch(opts: LaunchOptions): Promise<void> {
     process.stderr.write(`\n[elrond] Shutting down meeting...\n`);
     tmux("kill-session", "-t", tmuxSession);
     if (!hubProc.killed) hubProc.kill();
-    try { rmSync(`/tmp/elrond/${meetingId}`, { recursive: true, force: true }); } catch {}
-    try { unlinkSync(portFile); } catch {}
+    try {
+      rmSync(`/tmp/elrond/${meetingId}`, { recursive: true, force: true });
+    } catch {}
+    try {
+      unlinkSync(portFile);
+    } catch {}
     process.exit(0);
   };
 
@@ -334,7 +342,9 @@ export async function launch(opts: LaunchOptions): Promise<void> {
     process.stderr.write(`\n[elrond] Viewer exited. Hub and agents still running.\n`);
     process.stderr.write(`[elrond] Hub: http://127.0.0.1:${hubPort}\n`);
     process.stderr.write(`[elrond] tmux: tmux attach -t ${tmuxSession}\n`);
-    process.stderr.write(`[elrond] Restart viewer: bun run src/launcher.ts --no-viewer is not needed — just re-run.\n`);
+    process.stderr.write(
+      `[elrond] Restart viewer: bun run src/launcher.ts --no-viewer is not needed — just re-run.\n`,
+    );
     process.exit(0);
   };
 
@@ -399,10 +409,18 @@ function startTrustDialogWatcher(panes: string[]): { stop: () => void } {
   // Fire and forget — runs in background
   poll();
 
-  return { stop: () => { running = false; } };
+  return {
+    stop: () => {
+      running = false;
+    },
+  };
 }
 
-async function waitForAgentConnected(hubPort: number, agentId: string, timeoutMs: number): Promise<void> {
+async function waitForAgentConnected(
+  hubPort: number,
+  agentId: string,
+  timeoutMs: number,
+): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
@@ -413,7 +431,9 @@ async function waitForAgentConnected(hubPort: number, agentId: string, timeoutMs
     } catch {}
     await Bun.sleep(1000);
   }
-  process.stderr.write(`[elrond] Warning: ${agentId} did not connect within ${timeoutMs / 1000}s, sending prompt anyway\n`);
+  process.stderr.write(
+    `[elrond] Warning: ${agentId} did not connect within ${timeoutMs / 1000}s, sending prompt anyway\n`,
+  );
 }
 
 async function waitForPaneReady(pane: string, timeoutMs: number): Promise<void> {
@@ -438,7 +458,9 @@ async function waitForPaneReady(pane: string, timeoutMs: number): Promise<void> 
 
     await Bun.sleep(1000);
   }
-  process.stderr.write(`[elrond] Warning: pane ${pane} TUI not ready within ${timeoutMs / 1000}s, sending prompt anyway\n`);
+  process.stderr.write(
+    `[elrond] Warning: pane ${pane} TUI not ready within ${timeoutMs / 1000}s, sending prompt anyway\n`,
+  );
 }
 
 async function waitForPortFile(path: string, timeoutMs: number): Promise<number> {

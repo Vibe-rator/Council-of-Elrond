@@ -62,8 +62,7 @@ export class RingBuffer<T extends { id: string }> {
 
   /** Map a logical index (0 = oldest) to a physical buffer index. */
   private indexAt(logicalIdx: number): number {
-    const start =
-      this.count < this.capacity ? 0 : this.head;
+    const start = this.count < this.capacity ? 0 : this.head;
     return (start + logicalIdx) % this.capacity;
   }
 }

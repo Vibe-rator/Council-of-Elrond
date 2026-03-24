@@ -1,16 +1,8 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Subprocess } from "bun";
-import { existsSync, readFileSync, unlinkSync } from "fs";
-import { resolve } from "path";
-import type {
-  MeetingMessage,
-  WsEnvelope,
-  HandshakePayload,
-  HandshakeAckPayload,
-  SyncCompletePayload,
-  ConfigUpdatePayload,
-  PostMessageBody,
-} from "../../src/types.ts";
+import type { HandshakePayload, MeetingMessage, WsEnvelope } from "../../src/types.ts";
 
 const MEETING_ID = `test-hub-${Date.now()}`;
 const PORT_FILE = `/tmp/elrond-${MEETING_ID}.port`;
@@ -44,14 +36,16 @@ beforeAll(async () => {
 
 afterAll(() => {
   hubProc.kill();
-  try { unlinkSync(PORT_FILE); } catch {}
+  try {
+    unlinkSync(PORT_FILE);
+  } catch {}
 });
 
 describe("Hub REST API", () => {
   test("GET /api/status returns meeting info", async () => {
     const resp = await fetch(hubUrl("/api/status"));
     expect(resp.status).toBe(200);
-    const data = await resp.json() as { meetingId: string };
+    const data = (await resp.json()) as { meetingId: string };
     expect(data.meetingId).toBe(MEETING_ID);
   });
 
@@ -65,7 +59,7 @@ describe("Hub REST API", () => {
       }),
     });
     expect(resp.status).toBe(200);
-    const data = await resp.json() as { message: MeetingMessage };
+    const data = (await resp.json()) as { message: MeetingMessage };
     expect(data.message.content).toBe("Hello from Frodo");
     expect(data.message.type).toBe("user");
     expect(data.message.id).toBeTruthy();
@@ -73,7 +67,7 @@ describe("Hub REST API", () => {
 
   test("GET /api/messages returns posted message", async () => {
     const resp = await fetch(hubUrl("/api/messages?limit=10"));
-    const data = await resp.json() as { messages: MeetingMessage[] };
+    const data = (await resp.json()) as { messages: MeetingMessage[] };
     expect(data.messages.length).toBeGreaterThan(0);
     expect(data.messages.some((m) => m.content === "Hello from Frodo")).toBe(true);
   });
@@ -99,18 +93,30 @@ describe("Hub WebSocket", () => {
 
     await new Promise<void>((resolve) => {
       ws1.addEventListener("open", () => {
-        ws1.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "test-a1", agentName: "TestAgent1" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws1.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "test-a1",
+              agentName: "TestAgent1",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws2.addEventListener("open", () => {
-        ws2.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "test-a2", agentName: "TestAgent2" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws2.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "test-a2",
+              agentName: "TestAgent2",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
 
       ws1.addEventListener("message", (e) => {
@@ -166,7 +172,7 @@ describe("Hub WebSocket", () => {
 
     // Get all messages to find a ULID
     const resp = await fetch(hubUrl("/api/messages?limit=100"));
-    const data = await resp.json() as { messages: MeetingMessage[] };
+    const data = (await resp.json()) as { messages: MeetingMessage[] };
     const secondLast = data.messages[data.messages.length - 2];
 
     // Connect with lastSeenUlid
@@ -175,14 +181,16 @@ describe("Hub WebSocket", () => {
 
     await new Promise<void>((resolve) => {
       ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({
-          type: "handshake",
-          payload: {
-            clientType: "viewer",
-            lastSeenUlid: secondLast?.id,
-          } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "viewer",
+              lastSeenUlid: secondLast?.id,
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws.addEventListener("message", (e) => {
         received.push(JSON.parse(String(e.data)));
@@ -206,18 +214,30 @@ describe("Hub WebSocket", () => {
 
     await new Promise<void>((resolve) => {
       ws1.addEventListener("open", () => {
-        ws1.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "ws-sender", agentName: "Sender" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws1.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "ws-sender",
+              agentName: "Sender",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws2.addEventListener("open", () => {
-        ws2.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "ws-receiver", agentName: "Receiver" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws2.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "ws-receiver",
+              agentName: "Receiver",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws2.addEventListener("message", (e) => {
         ws2Messages.push(JSON.parse(String(e.data)));
@@ -227,11 +247,13 @@ describe("Hub WebSocket", () => {
 
     // Agent sends via WS send_message type
     const before = ws2Messages.length;
-    ws1.send(JSON.stringify({
-      type: "send_message",
-      payload: { content: "WS direct send", sender: { id: "ws-sender", name: "Sender" } },
-      ts: Date.now(),
-    } satisfies WsEnvelope));
+    ws1.send(
+      JSON.stringify({
+        type: "send_message",
+        payload: { content: "WS direct send", sender: { id: "ws-sender", name: "Sender" } },
+        ts: Date.now(),
+      } satisfies WsEnvelope),
+    );
 
     await Bun.sleep(200);
     const newMsgs = ws2Messages.slice(before);
@@ -252,11 +274,17 @@ describe("Hub Config Update", () => {
 
     await new Promise<void>((resolve) => {
       ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "cfg-agent", agentName: "ConfigTarget" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "cfg-agent",
+              agentName: "ConfigTarget",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws.addEventListener("message", (e) => {
         received.push(JSON.parse(String(e.data)));
@@ -271,7 +299,7 @@ describe("Hub Config Update", () => {
       body: JSON.stringify({ model: "claude-opus-4-20250514", effort: "max" }),
     });
     expect(resp.status).toBe(200);
-    const body = await resp.json() as { config: { model: string; effort: string } };
+    const body = (await resp.json()) as { config: { model: string; effort: string } };
     expect(body.config.model).toBe("claude-opus-4-20250514");
     expect(body.config.effort).toBe("max");
 
@@ -299,11 +327,17 @@ describe("Hub Reserved IDs", () => {
     const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
     const closeCode = await new Promise<number>((resolve) => {
       ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({
-          type: "handshake",
-          payload: { clientType: "agent", agentId: "frodo", agentName: "Imposter" } satisfies HandshakePayload,
-          ts: Date.now(),
-        } satisfies WsEnvelope));
+        ws.send(
+          JSON.stringify({
+            type: "handshake",
+            payload: {
+              clientType: "agent",
+              agentId: "frodo",
+              agentName: "Imposter",
+            } satisfies HandshakePayload,
+            ts: Date.now(),
+          } satisfies WsEnvelope),
+        );
       });
       ws.addEventListener("close", (e) => resolve(e.code));
       setTimeout(() => resolve(-1), 2000);

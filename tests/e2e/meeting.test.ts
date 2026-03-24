@@ -1,13 +1,12 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Subprocess } from "bun";
-import { existsSync, readFileSync, unlinkSync } from "fs";
-import { resolve } from "path";
 import type {
+  ForceSpeakPayload,
+  HandshakePayload,
   MeetingMessage,
   WsEnvelope,
-  HandshakePayload,
-  HandshakeAckPayload,
-  ForceSpeakPayload,
 } from "../../src/types.ts";
 
 /**
@@ -33,17 +32,22 @@ async function waitForPort(file: string): Promise<number> {
 }
 
 /** Connect a mock agent and wait for handshake_ack. */
-async function connectAgent(id: string, name: string): Promise<{ ws: WebSocket; messages: WsEnvelope[] }> {
+async function connectAgent(
+  id: string,
+  name: string,
+): Promise<{ ws: WebSocket; messages: WsEnvelope[] }> {
   const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
   const messages: WsEnvelope[] = [];
 
   await new Promise<void>((resolve, reject) => {
     ws.addEventListener("open", () => {
-      ws.send(JSON.stringify({
-        type: "handshake",
-        payload: { clientType: "agent", agentId: id, agentName: name } satisfies HandshakePayload,
-        ts: Date.now(),
-      } satisfies WsEnvelope));
+      ws.send(
+        JSON.stringify({
+          type: "handshake",
+          payload: { clientType: "agent", agentId: id, agentName: name } satisfies HandshakePayload,
+          ts: Date.now(),
+        } satisfies WsEnvelope),
+      );
     });
     ws.addEventListener("message", (e) => {
       const env: WsEnvelope = JSON.parse(String(e.data));
@@ -68,7 +72,9 @@ beforeAll(async () => {
 
 afterAll(() => {
   hubProc.kill();
-  try { unlinkSync(PORT_FILE); } catch {}
+  try {
+    unlinkSync(PORT_FILE);
+  } catch {}
 });
 
 describe("Meeting E2E (protocol-level)", () => {
@@ -129,8 +135,12 @@ describe("Meeting E2E (protocol-level)", () => {
 
     const a1Got = agent1.messages.filter((m) => m.type === "message_broadcast");
     const a2Got = agent2.messages.filter((m) => m.type === "message_broadcast");
-    expect(a1Got.some((m) => (m.payload as MeetingMessage).content === "What about WebAuthn?")).toBe(true);
-    expect(a2Got.some((m) => (m.payload as MeetingMessage).content === "What about WebAuthn?")).toBe(true);
+    expect(
+      a1Got.some((m) => (m.payload as MeetingMessage).content === "What about WebAuthn?"),
+    ).toBe(true);
+    expect(
+      a2Got.some((m) => (m.payload as MeetingMessage).content === "What about WebAuthn?"),
+    ).toBe(true);
 
     agent1.ws.close();
     agent2.ws.close();
@@ -152,10 +162,12 @@ describe("Meeting E2E (protocol-level)", () => {
     // Target should get force_speak
     const forceMsgs = agent1.messages.filter((m) => m.type === "force_speak");
     expect(forceMsgs.length).toBe(1);
-    expect((forceMsgs[0]!.payload as ForceSpeakPayload).prompt).toBe("Share your thoughts");
+    expect((forceMsgs[0]?.payload as ForceSpeakPayload).prompt).toBe("Share your thoughts");
 
     // Bystander should NOT get force_speak (but may get system events)
-    const bystanderForce = agent2.messages.slice(beforeCount2).filter((m) => m.type === "force_speak");
+    const bystanderForce = agent2.messages
+      .slice(beforeCount2)
+      .filter((m) => m.type === "force_speak");
     expect(bystanderForce.length).toBe(0);
 
     agent1.ws.close();
@@ -166,14 +178,14 @@ describe("Meeting E2E (protocol-level)", () => {
     const agent1 = await connectAgent("agent-pl1", "Joiner");
 
     const resp1 = await fetch(`http://127.0.0.1:${port}/api/participants`);
-    const data1 = await resp1.json() as { participants: Array<{ id: string }> };
+    const data1 = (await resp1.json()) as { participants: Array<{ id: string }> };
     expect(data1.participants.some((p) => p.id === "agent-pl1")).toBe(true);
 
     agent1.ws.close();
     await Bun.sleep(300);
 
     const resp2 = await fetch(`http://127.0.0.1:${port}/api/participants`);
-    const data2 = await resp2.json() as { participants: Array<{ id: string; status: string }> };
+    const data2 = (await resp2.json()) as { participants: Array<{ id: string; status: string }> };
     const agent = data2.participants.find((p) => p.id === "agent-pl1");
     expect(agent?.status).toBe("disconnected");
   });

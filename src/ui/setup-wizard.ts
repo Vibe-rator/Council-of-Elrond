@@ -3,20 +3,12 @@
  * Multi-step interactive wizard for configuring meetings.
  */
 
-import {
-  TUI,
-  ProcessTerminal,
-  Input,
-  matchesKey,
-  Key,
-  truncateToWidth,
-  visibleWidth,
-} from "@mariozechner/pi-tui";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { Input, Key, matchesKey, ProcessTerminal, TUI } from "@mariozechner/pi-tui";
 import chalk from "chalk";
-import { CATEGORIES, presetsByCategory, type Preset } from "../presets.ts";
-import { readFileSync, existsSync, readdirSync } from "fs";
-import { join } from "path";
-import { homedir } from "os";
+import { CATEGORIES, type Preset, presetsByCategory } from "../presets.ts";
 import type { MeetingState } from "../types.ts";
 
 // ---------------------------------------------------------------------------
@@ -130,7 +122,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
     let presetIdx = 0;
     let selectedPreset: Preset | null = null;
     let topic = "";
-    let agentCount = "3";
+    const agentCount = "3";
     let customAgents: WizardAgent[] = [];
     let customAgentIdx = 0;
     let agentField: "name" | "model" | "effort" | "persona" = "name";
@@ -245,10 +237,26 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         }
 
         // Arrow keys
-        if (matchesKey(data, Key.up)) { handleArrow("up"); tui.requestRender(); return; }
-        if (matchesKey(data, Key.down)) { handleArrow("down"); tui.requestRender(); return; }
-        if (matchesKey(data, Key.left)) { handleArrow("left"); tui.requestRender(); return; }
-        if (matchesKey(data, Key.right)) { handleArrow("right"); tui.requestRender(); return; }
+        if (matchesKey(data, Key.up)) {
+          handleArrow("up");
+          tui.requestRender();
+          return;
+        }
+        if (matchesKey(data, Key.down)) {
+          handleArrow("down");
+          tui.requestRender();
+          return;
+        }
+        if (matchesKey(data, Key.left)) {
+          handleArrow("left");
+          tui.requestRender();
+          return;
+        }
+        if (matchesKey(data, Key.right)) {
+          handleArrow("right");
+          tui.requestRender();
+          return;
+        }
 
         // 's' to start from confirm
         if (step === "confirm" && (data === "s" || data === "S")) {
@@ -264,11 +272,22 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
 
     function handleEscape(): void {
       switch (step) {
-        case "mode": done(null); break;
-        case "preset_cat": step = "mode"; break;
-        case "preset_pick": step = "preset_cat"; presetIdx = 0; break;
-        case "topic": step = selectedPreset ? "preset_pick" : "custom_count"; break;
-        case "custom_count": step = "mode"; break;
+        case "mode":
+          done(null);
+          break;
+        case "preset_cat":
+          step = "mode";
+          break;
+        case "preset_pick":
+          step = "preset_cat";
+          presetIdx = 0;
+          break;
+        case "topic":
+          step = selectedPreset ? "preset_pick" : "custom_count";
+          break;
+        case "custom_count":
+          step = "mode";
+          break;
         case "custom_agent":
           if (customAgentIdx > 0) {
             customAgentIdx--;
@@ -277,9 +296,16 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
             step = "custom_count";
           }
           break;
-        case "config_path": step = "mode"; break;
-        case "resume_pick": step = "mode"; break;
-        case "confirm": step = "topic"; activateTextInput(topic); break;
+        case "config_path":
+          step = "mode";
+          break;
+        case "resume_pick":
+          step = "mode";
+          break;
+        case "confirm":
+          step = "topic";
+          activateTextInput(topic);
+          break;
       }
     }
 
@@ -287,9 +313,16 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       switch (step) {
         case "mode":
           if (modeIdx === 0) step = "preset_cat";
-          else if (modeIdx === 1) { step = "custom_count"; activateTextInput(agentCount); }
-          else if (modeIdx === 2) { step = "config_path"; activateTextInput(""); }
-          else if (modeIdx === 3 && savedMeetings.length > 0) { step = "resume_pick"; resumeIdx = 0; }
+          else if (modeIdx === 1) {
+            step = "custom_count";
+            activateTextInput(agentCount);
+          } else if (modeIdx === 2) {
+            step = "config_path";
+            activateTextInput("");
+          } else if (modeIdx === 3 && savedMeetings.length > 0) {
+            step = "resume_pick";
+            resumeIdx = 0;
+          }
           break;
 
         case "preset_cat":
@@ -370,21 +403,27 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         }
 
         case "confirm":
-          if (dir === "up") confirmAgentIdx = clamp(confirmAgentIdx - 1, 0, customAgents.length - 1);
-          else if (dir === "down") confirmAgentIdx = clamp(confirmAgentIdx + 1, 0, customAgents.length - 1);
+          if (dir === "up")
+            confirmAgentIdx = clamp(confirmAgentIdx - 1, 0, customAgents.length - 1);
+          else if (dir === "down")
+            confirmAgentIdx = clamp(confirmAgentIdx + 1, 0, customAgents.length - 1);
           break;
 
         case "custom_agent": {
           if (agentField === "model") {
             const cur = customAgents[customAgentIdx]!;
             const idx = MODEL_OPTIONS.indexOf(cur.model);
-            if (dir === "left") cur.model = MODEL_OPTIONS[(idx - 1 + MODEL_OPTIONS.length) % MODEL_OPTIONS.length]!;
+            if (dir === "left")
+              cur.model = MODEL_OPTIONS[(idx - 1 + MODEL_OPTIONS.length) % MODEL_OPTIONS.length]!;
             else if (dir === "right") cur.model = MODEL_OPTIONS[(idx + 1) % MODEL_OPTIONS.length]!;
           } else if (agentField === "effort") {
             const cur = customAgents[customAgentIdx]!;
             const idx = EFFORT_OPTIONS.indexOf(cur.effort);
-            if (dir === "left") cur.effort = EFFORT_OPTIONS[(idx - 1 + EFFORT_OPTIONS.length) % EFFORT_OPTIONS.length]!;
-            else if (dir === "right") cur.effort = EFFORT_OPTIONS[(idx + 1) % EFFORT_OPTIONS.length]!;
+            if (dir === "left")
+              cur.effort =
+                EFFORT_OPTIONS[(idx - 1 + EFFORT_OPTIONS.length) % EFFORT_OPTIONS.length]!;
+            else if (dir === "right")
+              cur.effort = EFFORT_OPTIONS[(idx + 1) % EFFORT_OPTIONS.length]!;
           }
           break;
         }
@@ -406,7 +445,12 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
           if (n >= 1 && n <= 10) {
             customAgents = [];
             for (let i = 0; i < n; i++) {
-              customAgents.push({ name: `Agent-${i + 1}`, model: "claude-opus-4-6", effort: "max", persona: "" });
+              customAgents.push({
+                name: `Agent-${i + 1}`,
+                model: "claude-opus-4-6",
+                effort: "max",
+                persona: "",
+              });
             }
             customAgentIdx = 0;
             agentField = "name";
@@ -426,7 +470,12 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
             const raw = readFileSync(value.trim(), "utf8");
             const config = JSON.parse(raw);
             if (!config.agents?.length) throw new Error("No agents in config");
-            selectedPreset = { name: "Custom Config", description: value.trim(), category: "special", agents: config.agents };
+            selectedPreset = {
+              name: "Custom Config",
+              description: value.trim(),
+              category: "special",
+              agents: config.agents,
+            };
             topic = config.topic ?? "";
             step = "topic";
             activateTextInput(topic);
@@ -467,7 +516,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
 
     // --- Render functions ---
 
-    function renderMode(w: number): string[] {
+    function renderMode(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fg)("? How would you like to start?")}`);
       lines.push("");
@@ -477,7 +526,13 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         { icon: "🛠", label: "Custom", desc: "Configure agents manually" },
         { icon: "📄", label: "Config", desc: "Load from JSON file" },
         ...(savedMeetings.length > 0
-          ? [{ icon: "💾", label: "Resume", desc: `Continue a saved meeting (${savedMeetings.length})` }]
+          ? [
+              {
+                icon: "💾",
+                label: "Resume",
+                desc: `Continue a saved meeting (${savedMeetings.length})`,
+              },
+            ]
           : []),
       ];
 
@@ -493,7 +548,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderCategory(w: number): string[] {
+    function renderCategory(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fg)("? Choose a category:")}`);
       lines.push("");
@@ -510,7 +565,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderPresetPick(w: number): string[] {
+    function renderPresetPick(_w: number): string[] {
       const lines: string[] = [];
       const list = presetsByCategory(CATEGORIES[catIdx]!.key);
       lines.push(`  ${h(C.fg)("? Choose a preset:")}`);
@@ -532,10 +587,12 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderTopic(w: number): string[] {
+    function renderTopic(_w: number): string[] {
       const lines: string[] = [];
       if (selectedPreset) {
-        lines.push(`  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`);
+        lines.push(
+          `  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`,
+        );
         lines.push("");
       }
       lines.push(`  ${h(C.fg)("? Meeting topic:")}`);
@@ -543,14 +600,16 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       if (textInputActive) {
         lines.push(`  ${bold(C.accent, ">")} ${textInput.getValue?.() ?? ""}█`);
       } else {
-        lines.push(`  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`);
+        lines.push(
+          `  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`,
+        );
       }
       lines.push("");
       lines.push(`  ${h(C.fgMuted)("Enter Confirm  Esc Back")}`);
       return lines;
     }
 
-    function renderCustomCount(w: number): string[] {
+    function renderCustomCount(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fg)("? How many agents? (1-10)")}`);
       lines.push("");
@@ -564,13 +623,14 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderCustomAgent(w: number): string[] {
+    function renderCustomAgent(_w: number): string[] {
       const lines: string[] = [];
       const cur = customAgents[customAgentIdx]!;
       lines.push(`  ${h(C.fg)(`Agent ${customAgentIdx + 1} of ${customAgents.length}`)}`);
 
       if (agentField !== "name") lines.push(`  ${h(C.fgMuted)("Name:")} ${cur.name}`);
-      if (agentField === "effort" || agentField === "persona") lines.push(`  ${h(C.fgMuted)("Model:")} ${modelLabel(cur.model)}`);
+      if (agentField === "effort" || agentField === "persona")
+        lines.push(`  ${h(C.fgMuted)("Model:")} ${modelLabel(cur.model)}`);
       if (agentField === "persona") lines.push(`  ${h(C.fgMuted)("Effort:")} ${cur.effort}`);
       lines.push("");
 
@@ -585,7 +645,9 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         lines.push(`  ${h(C.fgMuted)("Enter Next  Esc Back")}`);
       } else if (agentField === "model") {
         const row = MODEL_OPTIONS.map((m, i) => {
-          return cur.model === m ? bold(C.accent, `[●${MODEL_LABELS[i]}]`) : h(C.fgMuted)(MODEL_LABELS[i]!);
+          return cur.model === m
+            ? bold(C.accent, `[●${MODEL_LABELS[i]}]`)
+            : h(C.fgMuted)(MODEL_LABELS[i]!);
         }).join("  ");
         lines.push(`  ${bold(C.accent, "Model:")} ${row}`);
         lines.push("");
@@ -602,7 +664,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderConfigPath(w: number): string[] {
+    function renderConfigPath(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fg)("? Path to config JSON:")}`);
       lines.push("");
@@ -619,7 +681,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderResumePick(w: number): string[] {
+    function renderResumePick(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fg)("? Choose a saved meeting:")}`);
       lines.push("");
@@ -633,7 +695,9 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
           const label = i === resumeIdx ? bold(C.fg, s.topic) : h(C.fgSec)(s.topic);
           const date = new Date(s.savedAt).toLocaleString();
           lines.push(`${arrow}${label}`);
-          lines.push(`      ${h(C.fgMuted)(`${s.agentCount} agents · ${s.messageCount} msgs · ${date}`)}`);
+          lines.push(
+            `      ${h(C.fgMuted)(`${s.agentCount} agents · ${s.messageCount} msgs · ${date}`)}`,
+          );
         }
       }
 
@@ -642,7 +706,7 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       return lines;
     }
 
-    function renderConfirm(w: number): string[] {
+    function renderConfirm(_w: number): string[] {
       const lines: string[] = [];
       lines.push(`  ${h(C.fgSec)("Topic:")} ${bold(C.fg, topic)}`);
       lines.push("");
@@ -655,9 +719,11 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         const arrow = selected ? bold(C.accent, " ▸ ") : "   ";
         const nameColor = selected ? C.fg : C.fgSec;
 
-        lines.push(`${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`);
+        lines.push(
+          `${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`,
+        );
 
-        const persona = a.persona.length > 60 ? a.persona.slice(0, 60) + "..." : a.persona;
+        const persona = a.persona.length > 60 ? `${a.persona.slice(0, 60)}...` : a.persona;
         lines.push(`      ${h(C.fgMuted)(persona || "(no persona)")}`);
         lines.push("");
       }

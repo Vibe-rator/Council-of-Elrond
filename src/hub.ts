@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Elrond Hub — Message broker + REST API + WebSocket server.
  *
@@ -7,10 +8,10 @@
  * and config changes.
  */
 
+import { existsSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { ServerWebSocket } from "bun";
-import { unlinkSync, mkdirSync, existsSync, readFileSync } from "fs";
-import { join } from "path";
-import { homedir } from "os";
 import { RingBuffer } from "./lib/ring-buffer.ts";
 import { generateUlid } from "./lib/ulid.ts";
 import type {
@@ -125,7 +126,10 @@ function pauseMeeting(): void {
   if (meetingPaused) return;
   meetingPaused = true;
   clearTurnTimeout();
-  if (pendingAdvanceTimer) { clearTimeout(pendingAdvanceTimer); pendingAdvanceTimer = null; }
+  if (pendingAdvanceTimer) {
+    clearTimeout(pendingAdvanceTimer);
+    pendingAdvanceTimer = null;
+  }
   turnInProgress = false;
   // Reset conclusion phase if active
   if (meetingPhase === "conclusion") {
@@ -229,7 +233,9 @@ function loadMeetingState(filePath: string): void {
   // Restore ledger history
   ledgerHistory.push(...state.ledgerHistory);
 
-  process.stderr.write(`[elrond-hub] Meeting restored from ${filePath} (${state.messages.length} messages)\n`);
+  process.stderr.write(
+    `[elrond-hub] Meeting restored from ${filePath} (${state.messages.length} messages)\n`,
+  );
 }
 
 // Load saved state on startup if env is set
@@ -306,7 +312,9 @@ function advanceTurn(nominatedNextSpeaker?: string): void {
     }
   } else {
     if (nominatedNextSpeaker) {
-      process.stderr.write(`[elrond-hub] Swarm: could not resolve "${nominatedNextSpeaker}", round-robin fallback\n`);
+      process.stderr.write(
+        `[elrond-hub] Swarm: could not resolve "${nominatedNextSpeaker}", round-robin fallback\n`,
+      );
     }
     currentTurnIdx = (currentTurnIdx + 1) % turnOrder.length;
   }
@@ -342,7 +350,9 @@ function startCurrentTurn(): void {
   turnTimeoutTimer = setTimeout(() => {
     const currentId = currentTurnAgentId();
     if (turnInProgress && currentId === agentId) {
-      process.stderr.write(`[elrond-hub] Turn timeout: ${agent.name} did not respond within ${TURN_TIMEOUT_MS / 1000}s, skipping\n`);
+      process.stderr.write(
+        `[elrond-hub] Turn timeout: ${agent.name} did not respond within ${TURN_TIMEOUT_MS / 1000}s, skipping\n`,
+      );
       broadcastSystemEvent("turn_timeout", `${agent.name} timed out — skipping turn.`);
       agent.config.status = "idle";
       turnInProgress = false;
@@ -385,9 +395,7 @@ function handleConsensusReached(conclusionAgentName?: string): void {
   meetingPhase = "conclusion";
 
   const resolvedId = resolveNextSpeakerId(conclusionAgentName);
-  conclusionAgentId = resolvedId && agents.has(resolvedId)
-    ? resolvedId
-    : turnOrder[0] ?? null;
+  conclusionAgentId = resolvedId && agents.has(resolvedId) ? resolvedId : (turnOrder[0] ?? null);
 
   if (!conclusionAgentId) return;
 
@@ -559,10 +567,7 @@ function json(data: unknown, status = 200): Response {
 // WebSocket: handshake
 // ---------------------------------------------------------------------------
 
-function handleHandshake(
-  ws: ServerWebSocket<WsClientData>,
-  payload: HandshakePayload,
-): void {
+function handleHandshake(ws: ServerWebSocket<WsClientData>, payload: HandshakePayload): void {
   if (payload.clientType === "agent" && payload.agentId) {
     if (RESERVED_IDS.has(payload.agentId)) {
       ws.close(4002, `reserved agent id: ${payload.agentId}`);
@@ -632,10 +637,7 @@ function handleHandshake(
   }
 }
 
-function handleSync(
-  ws: ServerWebSocket<WsClientData>,
-  lastSeenUlid?: string,
-): void {
+function handleSync(ws: ServerWebSocket<WsClientData>, lastSeenUlid?: string): void {
   if (!lastSeenUlid) {
     ws.send(envelope("sync_complete", { missedCount: 0 } satisfies SyncCompletePayload));
     return;
@@ -662,10 +664,7 @@ function handleSync(
 // WebSocket: message routing
 // ---------------------------------------------------------------------------
 
-function handleWsMessage(
-  ws: ServerWebSocket<WsClientData>,
-  raw: string,
-): void {
+function handleWsMessage(ws: ServerWebSocket<WsClientData>, raw: string): void {
   let env: WsEnvelope;
   try {
     env = JSON.parse(raw);
@@ -680,7 +679,10 @@ function handleWsMessage(
 
     case "send_message": {
       const body = env.payload as PostMessageBody;
-      body.sender = { id: ws.data.clientId, name: agents.get(ws.data.clientId)?.name ?? ws.data.clientId };
+      body.sender = {
+        id: ws.data.clientId,
+        name: agents.get(ws.data.clientId)?.name ?? ws.data.clientId,
+      };
       const msg = createMessage(body);
       broadcast(msg, ws.data.clientId);
       // ack with the created message id
@@ -717,7 +719,7 @@ async function handleRest(req: Request): Promise<Response> {
       turnOrder,
       meetingPhase,
       meetingPaused,
-      conclusionAgent: conclusionAgentId ? agents.get(conclusionAgentId)?.name ?? null : null,
+      conclusionAgent: conclusionAgentId ? (agents.get(conclusionAgentId)?.name ?? null) : null,
       recentLedger: ledgerHistory.slice(-5),
     });
   }
@@ -764,7 +766,10 @@ async function handleRest(req: Request): Promise<Response> {
       // #3: Conclusion check BEFORE ledger processing to prevent re-entrant consensus
       if (meetingPhase === "conclusion" && body.sender.id === conclusionAgentId) {
         agent.config.status = "idle";
-        broadcastSystemEvent("conclusion_complete", `${agent.name} has delivered the final output.`);
+        broadcastSystemEvent(
+          "conclusion_complete",
+          `${agent.name} has delivered the final output.`,
+        );
         clearTurnTimeout();
         turnInProgress = false;
         meetingPhase = "discussion";
@@ -784,7 +789,10 @@ async function handleRest(req: Request): Promise<Response> {
       if (body.sender.id === currentTurnAgentId()) {
         clearTurnTimeout();
         // #1: Cancel any pending advance timer before scheduling new one
-        if (pendingAdvanceTimer) { clearTimeout(pendingAdvanceTimer); pendingAdvanceTimer = null; }
+        if (pendingAdvanceTimer) {
+          clearTimeout(pendingAdvanceTimer);
+          pendingAdvanceTimer = null;
+        }
         pendingAdvanceTimer = setTimeout(() => {
           pendingAdvanceTimer = null;
           advanceTurn(body.nextSpeaker);
@@ -860,9 +868,7 @@ async function handleRest(req: Request): Promise<Response> {
     if (!agent?.ws) {
       return json({ error: "agent not connected" }, 404);
     }
-    agent.ws.send(
-      envelope("force_speak", body),
-    );
+    agent.ws.send(envelope("force_speak", body));
     return json({ success: true });
   }
 
@@ -905,7 +911,7 @@ setInterval(() => {
   const ping = envelope("heartbeat_ping", { ts: Date.now() });
   const now = Date.now();
 
-  for (const [id, agent] of agents) {
+  for (const [_id, agent] of agents) {
     if (agent.ws?.readyState === WS_OPEN) {
       agent.ws.send(ping);
       if (now - agent.lastPong > HEARTBEAT_TIMEOUT_MS) {
@@ -984,7 +990,15 @@ process.stderr.write(
 
 // Cleanup port file on exit
 function cleanup() {
-  try { unlinkSync(portFile); } catch {}
+  try {
+    unlinkSync(portFile);
+  } catch {}
 }
-process.on("SIGINT", () => { cleanup(); process.exit(0); });
-process.on("SIGTERM", () => { cleanup(); process.exit(0); });
+process.on("SIGINT", () => {
+  cleanup();
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  cleanup();
+  process.exit(0);
+});

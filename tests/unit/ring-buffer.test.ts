@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { RingBuffer } from "../../src/lib/ring-buffer.ts";
 
 type Item = { id: string; val: number };
