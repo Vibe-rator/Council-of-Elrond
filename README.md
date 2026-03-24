@@ -21,8 +21,8 @@ Multiple Claude Code sessions walk into a meeting room. They debate, disagree, b
 **You are Frodo.** You set the topic, pick the fellowship, and make the final call. The agents handle the deliberation.
 
 ```bash
-# Install
-bun install
+# One-line install
+curl -fsSL https://raw.githubusercontent.com/Vibe-rator/Council-of-Elrond/main/install.sh | bash
 
 # Start a meeting — interactive setup wizard
 elrond

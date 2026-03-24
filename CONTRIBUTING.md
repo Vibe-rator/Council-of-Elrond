@@ -6,14 +6,14 @@ Thanks for your interest in contributing to Project Elrond!
 
 ```bash
 # Clone the repo
-git clone https://github.com/Vibe-rator/project-elrond.git
-cd project-elrond
+git clone https://github.com/Vibe-rator/Council-of-Elrond.git
+cd Council-of-Elrond
 
 # Install dependencies (requires Bun)
 bun install
 
 # Run the project
-bun start
+elrond
 ```
 
 ## Development
