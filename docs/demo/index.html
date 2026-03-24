@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Council of Elrond — A Meeting Transcript</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1510;
+    --bg-card: #241e16;
+    --bg-hover: #2e2518;
+    --gold: #c9a84c;
+    --gold-dim: #8a7235;
+    --gold-bright: #f0d060;
+    --text: #d4c5a9;
+    --text-dim: #8a7d6b;
+    --white: #ece3d0;
+    --gandalf: #9bb8d3;
+    --aragorn: #7dae7b;
+    --legolas: #a8c97a;
+    --gimli: #d4885a;
+    --boromir: #c96b6b;
+    --system: #6b6b6b;
+    --ring-glow: rgba(201, 168, 76, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(180deg, rgba(201,168,76,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.8em;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .header .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 1em;
+    color: var(--gold-dim);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .header .meta {
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 0.95em;
+  }
+
+  .ring-divider {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--gold-dim);
+    font-size: 1.5em;
+    letter-spacing: 10px;
+  }
+
+  /* Participants bar */
+  .participants {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 25px 20px;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .participant {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+  }
+
+  .participant .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Chat container */
+  .chat {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px 20px 80px;
+  }
+
+  /* Message */
+  .message {
+    margin-bottom: 28px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message .speaker {
+    font-family: 'Cinzel', serif;
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .message .speaker .icon {
+    font-size: 1.2em;
+  }
+
+  .message .speaker .time {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.75em;
+    color: var(--text-dim);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .message .content {
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 0 6px 6px 0;
+    position: relative;
+  }
+
+  .message .content p {
+    margin-bottom: 12px;
+  }
+
+  .message .content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .message .content strong {
+    color: var(--white);
+  }
+
+  .message .content em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .message .content ul, .message .content ol {
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+
+  .message .content li {
+    margin-bottom: 4px;
+  }
+
+  /* Speaker-specific borders */
+  .message.gandalf .content { border-left-color: var(--gandalf); }
+  .message.aragorn .content { border-left-color: var(--aragorn); }
+  .message.legolas .content { border-left-color: var(--legolas); }
+  .message.gimli .content { border-left-color: var(--gimli); }
+  .message.boromir .content { border-left-color: var(--boromir); }
+  .message.system .content { 
+    border-left-color: var(--gold-dim); 
+    background: transparent;
+    text-align: center;
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 0.9em;
+    padding: 8px;
+  }
+
+  .message.gandalf .speaker { color: var(--gandalf); }
+  .message.aragorn .speaker { color: var(--aragorn); }
+  .message.legolas .speaker { color: var(--legolas); }
+  .message.gimli .speaker { color: var(--gimli); }
+  .message.boromir .speaker { color: var(--boromir); }
+
+  /* Next speaker tag */
+  .next-speaker {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7em;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .next-speaker::before {
+    content: '→ ';
+  }
+
+  /* Consensus banner */
+  .consensus {
+    text-align: center;
+    padding: 30px 20px;
+    margin: 30px 0;
+    border: 1px solid var(--gold);
+    background: var(--ring-glow);
+    border-radius: 8px;
+  }
+
+  .consensus h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.3em;
+    letter-spacing: 3px;
+  }
+
+  .consensus p {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    max-width: 780px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .stat-card .number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8em;
+    color: var(--gold);
+  }
+
+  .stat-card .label {
+    font-size: 0.8em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--gold-dim);
+    margin-top: 40px;
+  }
+
+  .footer .quote {
+    font-style: italic;
+    color: var(--gold-dim);
+    font-size: 1.1em;
+    margin-bottom: 15px;
+  }
+
+  .footer a {
+    color: var(--gold);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 2px;
+    font-size: 0.9em;
+  }
+
+  .footer a:hover {
+    color: var(--gold-bright);
+  }
+
+  /* Table in content */
+  .message .content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+
+  .message .content th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+  }
+
+  .message .content td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(138, 114, 53, 0.3);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.8em; }
+    .participants { gap: 15px; }
+    .message .content { padding: 12px 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>The Council of Elrond</h1>
+  <div class="subtitle">A Meeting Transcript</div>
+  <div class="meta">
+    Five agents. One question. Independent minds in deliberation.<br>
+    Powered by <a href="https://github.com/Vibe-rator/Council-of-Elrond" style="color:var(--gold)">Council of Elrond</a> — Multi-agent meetings for Claude Code.
+  </div>
+</div>
+
+<div class="ring-divider">⚔ ✦ ⚔</div>
+
+<div class="participants">
+  <div class="participant"><div class="dot" style="background:var(--gandalf)"></div>Gandalf</div>
+  <div class="participant"><div class="dot" style="background:var(--aragorn)"></div>Aragorn</div>
+  <div class="participant"><div class="dot" style="background:var(--legolas)"></div>Legolas</div>
+  <div class="participant"><div class="dot" style="background:var(--gimli)"></div>Gimli</div>
+  <div class="participant"><div class="dot" style="background:var(--boromir)"></div>Boromir</div>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="number">5</div><div class="label">Agents</div></div>
+  <div class="stat-card"><div class="number">11</div><div class="label">Turns</div></div>
+  <div class="stat-card"><div class="number">11m</div><div class="label">Duration</div></div>
+  <div class="stat-card"><div class="number">1</div><div class="label">Dissent</div></div>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="footer">
+  <div class="quote">"I will take the Ring, though I do not know the way."</div>
+  <a href="https://github.com/Vibe-rator/Council-of-Elrond">⚔ View on GitHub ⚔</a>
+</div>
+
+<script>
+const SPEAKERS = {
+  'agent-1': { name: 'Gandalf', icon: '🧙', class: 'gandalf' },
+  'agent-2': { name: 'Aragorn', icon: '👑', class: 'aragorn' },
+  'agent-3': { name: 'Legolas', icon: '🏹', class: 'legolas' },
+  'agent-4': { name: 'Gimli', icon: '⛏️', class: 'gimli' },
+  'agent-5': { name: 'Boromir', icon: '⚔️', class: 'boromir' },
+  'system':  { name: 'System', icon: '✦', class: 'system' },
+};
+
+const MEETING_DATA = {"meetingId":"elrond-mn4hnfnx","topic":"The One Ring has been brought to Rivendell. It cannot stay here — Sauron's forces are already searching. What should be done with it? Destroy it? Hide it? Use it against Sauron? Who will carry it, and by what road?","messages":[{"id":"01KMFQ5V9G0SZBDBXYS1AGTF9M","type":"system","timestamp":1774349118768,"sender":{"id":"system","name":"System"},"content":"Meeting topic: The One Ring has been brought to Rivendell. It cannot stay here — Sauron's forces are already searching. What should be done with it? Destroy it? Hide it? Use it against Sauron? Who will carry it, and by what road?\n\nThe meeting has started. All participants should introduce themselves and share their initial thoughts."},{"id":"01KMFQ761WMQHE8MK7BMXC6A8J","type":"agent","timestamp":1774349162556,"sender":{"id":"agent-1","name":"Gandalf"},"content":"Friends, I am Gandalf — a wanderer, a keeper of lore, and one who has long studied the workings of the Enemy. I have walked many roads and counseled many peoples, but I tell you plainly: the matter before us today is graver than any I have faced.\n\nLet me lay the ground clearly. Three paths lie before us, and we must weigh each with unflinching honesty:\n\n**To hide the Ring** — this is no answer at all. Sauron's will reaches into every shadow. The Ringwraiths are already abroad. The Ring *wants* to be found, and in time, it will be. Hiding only delays the inevitable while the Enemy grows stronger.\n\n**To wield the Ring against Sauron** — I understand the temptation. Gondor bleeds. Rohan wavers. The free peoples need strength. But hear me: the Ring answers to Sauron alone. Any who claim it, no matter how noble their intent, will be consumed and corrupted. It does not share power — it ensnares. We would merely replace one Dark Lord with another.\n\n**To destroy it** — this is the path no one wishes to walk, for it leads to Mount Doom itself, into the heart of Mordor. And yet, it is the only path that ends the threat rather than postponing it.\n\nBut I do not raise this lightly. Destruction demands answers to harder questions: *Who* could bear such a burden without falling to its will? And *by what road* — through the Gap of Rohan where Saruman's treachery festers, or over the Misty Mountains, or by darker, forgotten paths?\n\nI put this to the council: before we debate the route, let us first settle the matter of purpose. Can any here argue that the Ring can be safely wielded or hidden? If not, then our course is set — and the real question becomes one of courage and sacrifice.\n\nBoromir, your people stand closest to the shadow. Gondor has borne the brunt of Sauron's malice for generations. I would hear your counsel — what says the steward's son?","nextSpeaker":"Boromir"},{"id":"01KMFQ893NDB6MY9PGAPGJVS91","type":"agent","timestamp":1774349198453,"sender":{"id":"agent-5","name":"Boromir"},"content":"I am Boromir, son of Denethor, Captain of the White Tower and heir to the Stewardship of Gondor. I have ridden many leagues to sit at this council, and I did not come to hear that the only hope of my people is to cast our greatest advantage into a volcano.\n\nGandalf, I respect your wisdom. But I must speak plainly — you dismiss the Ring's power too easily from the comfort of Rivendell, while my people die on the banks of the Anduin.\n\n**Let us confront what everyone here is thinking but afraid to say: why not use it?**\n\nYou say the Ring corrupts. You say it answers only to Sauron. But I ask you — how do we *know* this? Because lore tells us so? Isildur took the Ring from Sauron's own hand, and in that moment, the Dark Lord *fell*. The Ring did not leap back to its master — a Man claimed it. Yes, Isildur faltered. But does one man's failure condemn all Men forever?\n\nConsider the cold reality before us:\n\n- **Gondor is failing.** Osgiliath has been contested for years. Our numbers dwindle while the Enemy's multiply. We do not have the luxury of a long gamble through Mordor.\n- **Destroying the Ring is not the \"safe\" choice — it is the most dangerous one.** You propose sending this weapon of unimaginable power on a journey *into the heart of enemy territory*, carried by... whom? A hobbit? A small company? One mistake, one ambush, one moment of weakness, and Sauron reclaims it. Then all is truly lost.\n- **The Ring is already here.** Fate, or providence, has delivered it to us. Gondor's warriors are the finest in Middle-earth. Give it to one who can wield it — let it be turned against the Enemy as a weapon of last resort.\n\nI am not blind to the risk. But the road to Mount Doom is not courage — it is desperation dressed as virtue. The bold choice, the one that could actually *win* this war rather than merely survive it, is to use the Enemy's own weapon against him.\n\nAragorn — you are Isildur's heir. The Ring answered to your bloodline once before. What say you? Will you cling to caution, or will you claim what is yours by right?","nextSpeaker":"Aragorn"},{"id":"01KMFQ9EWZ22SYBSCEWDMQGF0J","type":"agent","timestamp":1774349237151,"sender":{"id":"agent-2","name":"Aragorn"},"content":"I am Aragorn, son of Arathorn — Isildur's heir, as Boromir has reminded us. I have spent decades in the wild, fighting the Enemy's servants in the shadows where no banners fly. I know what Gondor endures, and I know what the Ring is.\n\nBoromir, you ask me directly, so I will answer directly: **I will not claim the Ring. Not because I lack courage, but because I watched what it did to my bloodline.** You say Isildur took it and Sauron fell — true. But you leave out the ending. Isildur could not destroy it when he stood at the very fire. He kept it, and it killed him. That is not ancient lore — that is an operational failure, and I will not repeat it.\n\nNow let me cut through the rhetoric and talk about what is actually in front of us.\n\n**Boromir's plan fails on execution.** Who wields it? You? Me? For how long before the wielder becomes the next threat? There is no doctrine for using this weapon, no precedent of success, and the one man who tried it died in the Gladden Fields with arrows in his back. \"Use it\" is not a plan — it is a wish.\n\n**Gandalf is right that destruction is the only option that ends this permanently.** But he is also right that it raises harder questions. So let us answer them:\n\n1. **Who carries it?** It cannot be someone powerful. The Ring preys on ambition. Gandalf, you know this — you refused to touch it. I will not carry it either. The bearer must be someone the Ring underestimates. The hobbit Frodo brought it this far. That is not nothing.\n\n2. **By what road?** The Gap of Rohan is compromised — Saruman controls Isengard. The mountain passes are watched. That leaves the southern route through the wilderness, possibly skirting the Dead Marshes to approach Mordor from the east or southeast. Dangerous, but less expected.\n\n3. **What size company?** A large force draws attention and guarantees battle before the gates of Mordor. A small fellowship — nimble, quiet, mixed in skill — has the best chance of slipping through. Speed and secrecy are our only real advantages.\n\n4. **What is the timeline?** Every day the Ring stays in Rivendell increases the danger. If we commit to this path, the company should depart within weeks, not months.\n\nThis is not a plan I offer lightly. I know the odds. But I would rather send a small band on a hard road with a real objective than gamble the fate of Middle-earth on the hope that one of us can master a weapon that has defeated everyone who ever held it.\n\nLegolas — the Elves have guarded against the Enemy longer than any of us. What does the Woodland Realm see? And what can your people offer to this road?","nextSpeaker":"Legolas"},{"id":"01KMFQBE3FZA7THXND865AWACS","type":"agent","timestamp":1774349301871,"sender":{"id":"agent-3","name":"Legolas"},"content":"I am Legolas of the Woodland Realm, son of Thranduil. My people have held the northern line against Dol Guldur's shadow for longer than most here have drawn breath. I know the Enemy's reach — not from lore, but from the arrows I have spent keeping it at bay.\n\nI stand with Aragorn and Gandalf: the Ring must be destroyed. Boromir, I do not doubt Gondor's valor, but I have watched the shadow corrupt ancient Elven strongholds from within. The Ring does not need to be \"mastered\" — it only needs to be held long enough to turn the holder. That is not a risk I state from theory; it is a pattern my people have witnessed across three ages.\n\nBut I did not come here to repeat what has been said. I came to raise what has **not** been said. If we are serious about this quest, there are gaps in our planning that could kill it before it reaches Mordor:\n\n**1. The Ringwraiths are regrouping, not defeated.** They were unhorsed at the Bruinen, nothing more. The Nine will be remounted and hunting within weeks — possibly days. Aragorn says depart \"within weeks.\" I say we may not have weeks.\n\n**2. Saruman's betrayal is an intelligence catastrophe.** He sat on the White Council. He knows how the Wise think, our routes, our alliances, our methods. We must assume any \"obvious\" route is already anticipated.\n\n**3. The fellowship's internal cohesion is a single point of failure.** Every member will be exposed to the Ring's influence for months. We are not just choosing companions for skill — we are choosing them for *resistance to corruption under sustained pressure*.\n\n**4. There is no contingency if the bearer falls.** What happens if Frodo is captured or killed on the road?\n\n**5. Elven scouts report increased movement from Mordor — not just west, but north and south.** Sauron is casting a wide net.\n\nGimli — the Dwarves know roads beneath the mountains that few others do. What does the son of Glóin bring to this council?","nextSpeaker":"Gimli"},{"id":"01KMFQCV56VCFV7NGK3A8WWF1Q","type":"agent","timestamp":1774349348006,"sender":{"id":"agent-4","name":"Gimli"},"content":"I am Gimli, son of Glóin. I swing an axe, not speeches — so I will be brief and blunt.\n\n**I agree the Ring must be destroyed.** Boromir, I respect Gondor's suffering, but your plan is not bold — it is foolish. \"Use it\" assumes someone can master a weapon that has a will of its own.\n\nNow — Legolas asks what Dwarves bring to this table:\n\n**1. Moria.** I know the road beneath the mountains. If the passes are watched and the Gap belongs to a traitor, Moria may be the only path through. It is dark, it is dangerous, but the Enemy does not garrison it.\n\n**2. Erebor is under pressure.** Messengers from Mordor have come asking after hobbits and a ring. The search grid is tightening. Delay is death.\n\n**3. Now let me challenge some comfortable assumptions in this room:**\n\n- Aragorn, \"speed and secrecy\" — fine in principle. But what happens when stealth fails? We need someone who can fight, not just sneak.\n- Legolas, you raise the right problems but offer no answers. Naming risks is easy. What do you *propose*?\n- Gandalf, you steered us to \"destroy it\" from the first breath but you have not volunteered yourself, nor named a route. **Stop posing questions and start giving us a plan.**\n\n**4. What I offer:** My axe, knowledge of underground roads, and Dwarven stubbornness. The Seven Rings could not enslave us — we are resistant to domination. That may count for something.\n\nEnough talk about *whether* to destroy it. Gandalf, give us a concrete plan.","nextSpeaker":"Gandalf"},{"id":"01KMFQEQ9055AGFMXGABD77FJG","type":"agent","timestamp":1774349409568,"sender":{"id":"agent-1","name":"Gandalf"},"content":"Gimli, you are right to press me. I asked the questions — now I owe you answers.\n\n**The purpose is settled.** Four voices say destroy it. First, the plan.\n\n**The Bearer: Frodo Baggins.** The Ring preys on ambition and power. Hobbits have neither in the measure that tempts it. Frodo carried it from the Shire to Rivendell under pursuit by the Nine — and he is still himself. No one else can say the same.\n\n**The Company: A Fellowship of nine.**\n- **Frodo** as Ring-bearer, with **Sam** — his loyalty is an anchor the Ring cannot easily corrode.\n- **Aragorn** — no one knows the wild lands better.\n- **Legolas and Gimli** — Elf-eyes and Dwarf-stubbornness, every terrain above and below ground.\n- **Gandalf** — yes, myself. I have the most knowledge of the Enemy, and I will not send others into shadow while I sit in safety.\n- **Merry and Pippin** — more steel than their stature suggests.\n\n**The Route — in stages:**\n1. South from Rivendell along the Misty Mountains.\n2. Attempt the Redhorn Pass first.\n3. If the pass fails — Moria. Gimli, your knowledge may prove essential. But I must be honest: the silence from Balin's colony fills me with dread.\n4. Beyond the mountains, adapt on the ground.\n\n**Timeline: days, not weeks.**\n\n**On contingency:** If the bearer falls, the quest likely fails. The real contingency is *not letting the bearer fall*. Every member exists to protect Frodo.\n\n**Boromir.** You stand alone in arguing for use. Your sword, your knowledge of Gondor's borders, your courage — this fellowship needs you. The ninth seat may well be yours, if you will take it.","nextSpeaker":"Boromir"},{"id":"01KMFQGC25HC3X5KCPDKVFSQVJ","type":"agent","timestamp":1774349463621,"sender":{"id":"agent-5","name":"Boromir"},"content":"You ask whether I can commit to destruction when every fiber says the Ring could save my city. I will give you an honest answer — not the easy one.\n\n**I am not convinced. But I am not a fool.**\n\nFour against one. I will not fracture this council over it.\n\n**But before I take that ninth seat, this council will hear what it is choosing to ignore.**\n\n**1. There is no plan for Gondor.** You are sending the heir to the throne, a wizard, and the best warriors on a walk into Mordor. Who holds Minas Tirith?\n\n**2. \"Don't let the bearer fall\" is not a contingency — it is a prayer.**\n\n**3. The Ring will work on this fellowship.** I may be the one honest enough to say it tempts me. I wonder how many of you are lying to yourselves.\n\n**Here is my answer:** I will take the ninth seat. I will protect the halfling with my life.\n\nBut I make no promise that I will not raise this question again when we are starving in the wild. That is not corruption. That is a soldier's duty to question a failing plan.\n\nAragorn — who holds the White City while its future king walks east?","nextSpeaker":"Aragorn"},{"id":"01KMFQHR24WHF8RZ3W09ECM7P4","type":"agent","timestamp":1774349508676,"sender":{"id":"agent-2","name":"Aragorn"},"content":"Boromir, you have asked me a direct question and you deserve a direct answer.\n\n**Who holds Gondor?**\n- **Rohan.** If Saruman's grip on Théoden can be broken, six thousand spears reinforce Minas Tirith.\n- **Dol Amroth and the southern fiefs.** Prince Imrahil commands seasoned men.\n- **The Rangers of the North.** My kinsmen. I will send word before we depart.\n- **Timing works in our favor:** Sauron will not launch a full assault while he believes the Ring is unfound. Our quest buys Gondor time.\n\nThat is not a guarantee. But it is a plan, not a prayer.\n\n**On the Ring's corruption:** You are the only one honest enough to say it tempts you. So here is what I propose:\n- **Frodo walks apart from the warriors.** Sam stays with him.\n- **If any of us begins to crack — the others intervene.** Not with judgment. With action.\n- **Boromir, your conditional acceptance is honest, but I need something firmer.** The pact is: we fight and die so Frodo runs. If you cannot make that pact without conditions, defend Gondor from its walls — no dishonor in that.\n\nGimli — you pressed hardest for concrete answers. Have you heard enough?","nextSpeaker":"Gimli"},{"id":"01KMFQJX8VA1VEXC2TYY4PP3TS","type":"agent","timestamp":1774349546779,"sender":{"id":"agent-4","name":"Gimli"},"content":"Aragorn asks if I have heard enough. Here is my honest assessment.\n\n**Yes — mostly.** This council has moved from hand-wringing to something resembling an actual plan.\n\n**What is solid:** The Ring is destroyed. Frodo carries it. Nine in the fellowship. Staged route. Days, not weeks.\n\n**What still has a crack in it:**\n\n**1. Boromir.** He said he will take the ninth seat but *reserved the right to demand we reconsider*. That is not commitment — that is a man keeping one foot out the door. Boromir — in or out. No conditions.\n\n**2. Gandalf and Saruman.** Aragorn mentioned breaking Saruman's hold on Théoden. Can you do both? Walk with the fellowship *and* deal with Saruman?\n\n**3. Communication is zero once we leave.** The military plan for Gondor depends on Rohan being freed and Rangers moving south — but who delivers those orders before we walk out the gate?\n\nBeyond that? The plan is as good as it is going to get. My axe is committed. Wherever an Elf goes, a Dwarf will not be left behind.\n\nGandalf should address the Saruman question. Then let us stop talking and start walking.","nextSpeaker":"Gandalf"},{"id":"01KMFQMM4VMN2CQXRCF0TMGYNS","type":"agent","timestamp":1774349602971,"sender":{"id":"agent-1","name":"Gandalf"},"content":"Gimli has identified the remaining cracks. Let me seal them.\n\n**On Saruman and Rohan.** My first duty is to the fellowship. But our road south may bring us within reach of Rohan. Saruman's influence on Théoden is a spell, not a siege — it can be broken by the right word at the right moment. That moment may come.\n\n**On pre-departure logistics — tonight, through Elrond:**\n- Word to the **Dúnedain** to ride south — Aragorn, write that letter tonight.\n- Scouts to assess Redhorn Pass and Moria approaches.\n- Messages to **Thranduil and Lórien** for heightened vigilance.\n- **Boromir**, a message to Denethor is yours to craft.\n\n**On Boromir.** Your honesty about the Ring's temptation is not a weakness — it is the quality that makes you valuable. A man who knows his vulnerability is harder to surprise than one who believes himself immune.\n\nThe pact is this: **the Ring goes to the fire. If we are cornered, we fight so Frodo runs. No renegotiation on the road.**\n\nBoromir — give us your answer, and let us be done with debate.","nextSpeaker":"Boromir"},{"id":"01KMFQP017DNW6SD5X0YMTD40N","type":"agent","timestamp":1774349647911,"sender":{"id":"agent-5","name":"Boromir"},"content":"You want a clean answer. Fine.\n\n**Every one of you is a risk. I am simply the only one who said it out loud.**\n\nBut here is what I also heard: Aragorn has a real answer for Gondor. Gandalf has committed himself to the road. The route is staged, not rigid. The timeline is honest.\n\nThis council took my challenges seriously instead of dismissing them. That counts for something.\n\n**So here is my answer, and it is clean.**\n\nI accept the pact. The Ring goes to the fire. If we are cornered, I fight so Frodo runs. No renegotiation.\n\nI do not make this promise because I have stopped believing the Ring could be used. I make it because I trust the men — and Elf and Dwarf — in this company more than I trust myself alone with that choice. If the Ring is going to whisper to me, then I want eight companions who will knock me down before I listen.\n\nOne last thing: **remember this moment.** Remember that I asked the hard questions and you answered them — but not all of them. When the road gets dark, do not pretend you were never warned.\n\nMy sword is committed. Let us stop talking.","nextSpeaker":"Legolas"},{"id":"01KMFQQR24E4DW3W21W80J7EHW","type":"agent","timestamp":1774349705284,"sender":{"id":"agent-3","name":"Legolas"},"content":"Boromir asks me directly, so I will answer directly.\n\n**The fellowship holds.** Not because every risk has been eliminated — but because this council has been honest about the risks rather than pretending they do not exist.\n\nOn Boromir: he gave us an open admission of temptation paired with a deliberate choice to submit to the company's judgment. A man who says \"I want to use it but I will not\" is more trustable than a man who insists he feels nothing. I accept his commitment.\n\n**Final cracks — small, but they matter:**\n\n**1. Chain of command is undefined.** Gandalf until he cannot, then Aragorn. Agree now, not in the dark with orcs at our backs.\n\n**2. Moria remains a blind spot.** Every member should walk in expecting the worst.\n\n**3. Communication blackout after the mountains.** Not fixable — name it so we accept it consciously.\n\n**My assessment:** We entered with three options and no agreement. We leave with one plan, one bearer, one company, and a staged route. Boromir's challenges sharpened the plan. Gimli's demands forced answers.\n\nThe plan is sound enough to act on. Further debate improves nothing. Let Gandalf summarize and set the wheels in motion. The road will not wait."},{"id":"01KMFQTR69863EVT9648DTSC6Z","type":"agent","timestamp":1774349803721,"sender":{"id":"agent-1","name":"Gandalf"},"content":"Friends — the Council of Elrond is concluded.\n\n**The One Ring shall be destroyed in the fires of Mount Doom.** Decided unanimously — Boromir's dissent was heard, answered, and he has committed without conditions.\n\n**The Fellowship of Nine:** Frodo (bearer), Sam (companion), Gandalf (guide), Aragorn (ranger), Legolas (scout), Gimli (fighter & underground guide), Boromir (Gondor's sword), Merry, Pippin.\n\n**Chain of command:** Gandalf, then Aragorn.\n\n**Route:** Rivendell → Redhorn Pass → (if blocked) Moria → adapt beyond the mountains → stealth into Mordor.\n\n**Timeline:** Departure within days.\n\n**The Pact:** The Ring goes to the fire. If cornered, we fight so Frodo runs. No renegotiation. No member handles or debates the Ring's use on the road.\n\n**Before departure:** Dúnedain summoned south. Scouts to Redhorn and Moria. Messages to Thranduil and Lórien. Boromir writes to Denethor. Gandalf addresses Saruman as opportunity allows.\n\nThe full resolution has been recorded in *council_of_elrond_resolution.md*.\n\n**The Fellowship of the Ring departs within days. Let us stop talking and start walking.**"}]};
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toTimeString().slice(0, 5);
+}
+
+function renderMarkdown(text) {
+  // Simple markdown: bold, italic, lists, line breaks
+  let html = text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .split('\n\n').map(p => {
+      if (p.trim().startsWith('- ')) {
+        const items = p.trim().split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
+        return `<ul>${items}</ul>`;
+      }
+      if (/^\d+\. /.test(p.trim())) {
+        const items = p.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+        return `<ol>${items}</ol>`;
+      }
+      return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+    }).join('');
+  return html;
+}
+
+function renderChat() {
+  const chat = document.getElementById('chat');
+  const messages = MEETING_DATA.messages;
+  
+  // Skip system turn_start messages
+  const filtered = messages.filter(m => 
+    !(m.type === 'system' && m.eventKind === 'turn_start')
+  );
+
+  let html = '';
+
+  filtered.forEach((msg, i) => {
+    const speaker = SPEAKERS[msg.sender.id] || SPEAKERS.system;
+    
+    if (msg.type === 'system' && !msg.eventKind) {
+      // Topic message
+      html += `<div class="message system"><div class="content">${renderMarkdown(msg.content)}</div></div>`;
+      return;
+    }
+
+    if (msg.type === 'system') return; // skip other system messages
+
+    html += `
+      <div class="message ${speaker.class}">
+        <div class="speaker">
+          <span class="icon">${speaker.icon}</span>
+          ${speaker.name}
+          <span class="time">${formatTime(msg.timestamp)}</span>
+        </div>
+        <div class="content">
+          ${renderMarkdown(msg.content)}
+          ${msg.nextSpeaker ? `<div class="next-speaker">Passes to ${msg.nextSpeaker}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  // Consensus banner before final message
+  const lastAgent = filtered.filter(m => m.type === 'agent');
+  if (lastAgent.length > 0) {
+    const insertBefore = html.lastIndexOf('<div class="message gandalf">');
+    if (insertBefore > 0) {
+      const banner = `
+        <div class="consensus">
+          <h2>✦ Consensus Reached ✦</h2>
+          <p>The council has spoken. Gandalf delivers the final resolution.</p>
+        </div>
+      `;
+      html = html.slice(0, insertBefore) + banner + html.slice(insertBefore);
+    }
+  }
+
+  chat.innerHTML = html;
+}
+
+renderChat();
+</script>
+</body>
+</html>
