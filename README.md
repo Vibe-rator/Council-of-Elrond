@@ -148,16 +148,16 @@ The fellowship deliberates. Each persona maps to a useful meeting role — strat
 
 There are several multi-agent tools out there. Here's where Council of Elrond fits:
 
-|  | Agent Teams | AutoGen | Cross-Claude MCP | ChatDev | **Council of Elrond** |
-|--|------------|---------|-----------------|---------|----------------------|
-| Structure | Lead → teammates | Configurable | Flat (P2P) | Phase-based roles | **Flat (round table)** |
-| Communication | Through lead only | Shared thread | Polling (SQLite) | Sequential 2-agent | **Real-time push** |
-| Agent-to-agent talk | ❌ | ✅ | ✅ | ✅ (paired) | **✅ (all-to-all)** |
-| Purpose | Task delegation | General framework | Message passing | Software generation | **Deliberation** |
-| Setup | Code spawning | Python code | Config + install | Python code | **`elrond` one command** |
-| Real-time TUI | ❌ | ❌ | ❌ | ❌ | **✅** |
-| User intervention | Spawn & wait | Programmatic | Manual | None | **Anytime (Frodo)** |
-| Push notifications | Internal API | Sequential calls | ❌ (polling) | Sequential calls | **Channels MCP** |
+| | Council of Elrond | Agent Teams | AutoGen | Cross-Claude MCP | ChatDev |
+|--|-------------------|------------|---------|-----------------|---------|
+| Language | TypeScript / Bun | Built into Claude Code | Python | TypeScript | Python |
+| Structure | Flat (round table) | Hierarchical (lead → teammates) | Configurable | Flat (P2P) | Phase-based pairs |
+| Agent-to-agent | All-to-all broadcast | Through lead only | Shared thread | Channel-based | Sequential pairs |
+| Message delivery | Push (Channels MCP) | Internal API | Function calls | Polling (SQLite) | Function calls |
+| User participation | Live, mid-conversation | Spawn and wait | Programmatic | Manual messages | None |
+| Setup | CLI — one command | Built-in | Python code | Config + npm install | Python code |
+| Preset roles | 12 meeting templates | None | None | Fixed (CEO, CTO, etc.) | Fixed (CEO, CTO, etc.) |
+| Observation UI | Terminal TUI | tmux attach | Console logs | None | Console logs |
 
 **[Agent Teams](https://code.claude.com/docs/en/agent-teams)** is the closest comparison — it's built into Claude Code. But it's hierarchical: a lead delegates tasks to teammates who report back. Teammates don't talk to each other. It's a project manager, not a meeting.
 
