@@ -88,6 +88,12 @@ Each agent runs in its own Claude Code session with a [Channel MCP Server](https
 ### Install
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/Vibe-rator/Council-of-Elrond/main/install.sh | bash
+```
+
+Or manually:
+
+```bash
 git clone https://github.com/Vibe-rator/Council-of-Elrond.git
 cd Council-of-Elrond
 bun install
@@ -97,13 +103,13 @@ bun install
 
 ```bash
 # Interactive wizard — pick a preset or build your own team
-bun start
+elrond
 
 # Quick start with N agents
-bun start 3 --topic "Should we use GraphQL or REST?"
+elrond 3 --topic "Should we use GraphQL or REST?"
 
 # From a config file
-bun start ./configs/example.json
+elrond ./configs/example.json
 ```
 
 ### Viewer Controls
