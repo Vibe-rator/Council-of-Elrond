@@ -6,7 +6,14 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { Input, Key, matchesKey, ProcessTerminal, TUI, truncateToWidth } from "@mariozechner/pi-tui";
+import {
+  Input,
+  Key,
+  matchesKey,
+  ProcessTerminal,
+  TUI,
+  truncateToWidth,
+} from "@mariozechner/pi-tui";
 import chalk from "chalk";
 import { CATEGORIES, type Preset, presetsByCategory } from "../presets.ts";
 import type { MeetingState } from "../types.ts";
@@ -605,17 +612,27 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
       const lines: string[] = [];
       if (selectedPreset) {
         lines.push(
-          truncateToWidth(`  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`, w, ""),
+          truncateToWidth(
+            `  ${h(C.success)("✓")} Preset: ${bold(C.fg, selectedPreset.name)} (${selectedPreset.agents.length} agents)`,
+            w,
+            "",
+          ),
         );
         lines.push("");
       }
       lines.push(`  ${h(C.fg)("? Meeting topic:")}`);
       lines.push("");
       if (textInputActive) {
-        lines.push(truncateToWidth(`  ${bold(C.accent, ">")} ${textInput.getValue?.() ?? ""}█`, w, ""));
+        lines.push(
+          truncateToWidth(`  ${bold(C.accent, ">")} ${textInput.getValue?.() ?? ""}█`, w, ""),
+        );
       } else {
         lines.push(
-          truncateToWidth(`  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`, w, ""),
+          truncateToWidth(
+            `  ${bold(C.accent, ">")} ${topic || h(C.fgMuted)("What should the meeting discuss?")}`,
+            w,
+            "",
+          ),
         );
       }
       lines.push("");
@@ -734,7 +751,11 @@ export async function runSetupWizard(): Promise<WizardResult | null> {
         const nameColor = selected ? C.fg : C.fgSec;
 
         lines.push(
-          truncateToWidth(`${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`, w, ""),
+          truncateToWidth(
+            `${arrow}${chalk.bgHex(C.accent).black(` ${initial(a.name)} `)} ${bold(nameColor, a.name)}       ${h(C.fgMuted)(`${modelLabel(a.model)} · ${a.effort}`)}`,
+            w,
+            "",
+          ),
         );
 
         const persona = a.persona.length > 60 ? `${a.persona.slice(0, 60)}...` : a.persona;
